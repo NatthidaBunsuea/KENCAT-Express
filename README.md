@@ -1,7 +1,8 @@
 # KENCAT-Express
 # Parcel Delivery Management System – API Overview
 
-## 1. Authentication & User (Responsible: Aida, Natthida Bunsuea, 6609650350)
+## 1. Authentication & User 
+## Responsible: Aida, Natthida Bunsuea, 6609650350
 
 ### POST /api/auth/login
 **Description:**  
@@ -91,7 +92,7 @@ The system processes these parameters and returns the estimated cost for the del
 ---
 
 ## 4. Parcel Tracking
-
+## Responsible: Muay, Piyatida Reakdee, 6609650491
 ### GET /api/trackings/{trackId}
 **Description:**  
 Retrieve the tracking status of a parcel.
