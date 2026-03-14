@@ -1,20 +1,24 @@
 # KENCAT-Express
 # Parcel Delivery Management System – API Overview
 
-## 1. Authentication & User 
+## 1. Authentication & User
 ## Responsible: Aida, Natthida Bunsuea, 6609650350
 
 ### POST /api/auth/login
 **Description:**  
-Authenticate an employee and allow access to the system.
+Authenticate an employee and grant access to the Parcel Delivery Management System.
 
-**Details:**  
-This endpoint is used by employees to log into the system using their email or employee ID and password.  
-If the credentials are valid, the system will authenticate the user and return an access token that can be used to access protected endpoints.
+**Details:** 
+This endpoint verifies the employee’s login credentials (such as email/username and password).  
+The system validates the credentials against the stored user records in the database. If the authentication is successful, the system returns an access token that allows the employee to access protected system resources.
+
+The authentication process may include password verification using secure hashing methods and validation of the user’s account status.
 
 **Purpose:**  
-- Verify employee identity  
-- Allow secure access to the system
+- Authenticate employees before accessing the system  
+- Ensure only authorized personnel can use system functions  
+- Provide a secure access token for subsequent API requests  
+- Protect the system from unauthorized access
 
 
 ### GET /api/users/{userId}
@@ -26,7 +30,7 @@ This endpoint returns the profile information of a user based on the provided `u
 The returned data may include personal information such as name, contact information, and other relevant user details stored in the system.
 
 **Purpose:**  
-- Allow employees to view user information  
+- Allow employees to view user profile information  
 - Support customer service and parcel management
 
 
@@ -93,6 +97,7 @@ The system processes these parameters and returns the estimated cost for the del
 
 ## 4. Parcel Tracking
 ## Responsible: Muay, Piyatida Reakdee, 6609650491
+
 ### GET /api/trackings/{trackId}
 **Description:**  
 Retrieve the tracking status of a parcel.
