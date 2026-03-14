@@ -67,6 +67,7 @@ It allows employees to view and manage parcels that are pending, in transit, or 
 ---
 
 ## 3. Parcel Details & Shipping Calculation
+## Responsible: Gus, Natchathorn Danusawad, 6609650319
 
 ### GET /api/parcels/{parcelId}
 **Description:**  
