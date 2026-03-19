@@ -37,7 +37,7 @@ The returned data may include personal information such as name, contact informa
 ---
 
 ## 2. Parcel Management
-
+## Responsible: Woon, Pitiphat Jadnuang 6609650483
 ### POST /api/parcels
 **Description:**  
 Create a new parcel record in the system.
@@ -137,7 +137,8 @@ Additional information such as delivery confirmation photos may also be stored.
 ---
 
 ## 5. Messenger Operations
-
+## Responsible: Oom, Pumipat Santhongkaew
+6609650574
 ### GET /api/messenger/tasks
 **Description:**  
 Retrieve delivery tasks assigned to a messenger.
