@@ -1,0 +1,48 @@
+version: '3.9'
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: kencat_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: Muaymin_ly12548
+      MYSQL_DATABASE: kencat
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-pMuaymin_ly12548"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: kencat_api
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      APP_ENV: development
+      PORT: 8080
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: root
+      DB_PASSWORD: Muaymin_ly12548
+      DB_NAME: kencat
+      JWT_SECRET: kencat-super-secret-key
+      JWT_TTL: 24h
+      PASSWORD_SALT: kencat-express-salt
+      AUTO_MIGRATE: "true"
+      AUTO_SEED: "true"
+      CORS_ALLOW_ORIGIN: "http://localhost:8080"
+      FRONTEND_DIR: /app/Frontend
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./Frontend:/app/Frontend
+
+volumes:
+  mysql_data:
