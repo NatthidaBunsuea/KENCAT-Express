@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/loginEm.css">
+    <title>Kencat express</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body style="padding-right: 15px; overflow: hidden;">
+
+    <div class="header">
+        <img src="../images/Kencat_employee_logo.png" alt="KenCat Express Logo" class="logo">
+        <a type="reset" class="back-button" onclick="window.history.back()">BACK</a>
+    </div>
+
+    <div class="container">
+        <div class="title">LOGIN</div>
+        
+        <form id="loginForm">
+            <div class="input-box">
+                <span class="details">EmployeeID</span>
+                <input type="text" name="employeeID" id="employeeID" required>
+                <span class="error-msg" id="employeeID-error"></span>
+            </div>
+            <div class="input-box">
+                <span class="details">Password</span>
+                <input type="password" name="password" id="password" required>
+                <span class="error-msg" id="password-error"></span>
+            </div>
+            <div class="category">
+                <label>
+                    <input type="radio" name="role" value="Parcel Clerk" required>
+                    <span class="roles">Parcel Clerk</span>
+                </label>
+                <label>
+                    <input type="radio" name="role" value="Messenger">
+                    <span class="roles">Messenger</span>
+                </label>
+            </div>
+            <div class="button">
+                <input type="submit" value="Login">
+            </div>
+        </form>
+    </div>
+    <div id="loginFailModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h3>Login Failed!</h3>
+            <div class="error-icon">❌</div>
+            <p id="errorMessage"><strong>Error:</strong> <span id="errorText"></span></p>
+        </div>
+    </div>
+
+    <script src="../js/loginEm.js"></script>
+</body>
+</html>

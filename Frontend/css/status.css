@@ -1,0 +1,268 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.container {
+  flex: 1;
+  
+}
+
+body {
+    font-family: sans-serif;
+    margin-top: 100px;
+    margin-bottom: 60px;
+    background-color: #FF9C32;
+  }
+  
+ /********** navigation bar **********/
+.logo img {
+  height: 50px;
+}
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  max-width: 100vw;
+  box-sizing: border-box;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.nav-links a {
+  position: relative;
+  color: rgb(255, 255, 255);
+  text-decoration: none;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+  font-weight: bold;
+  font-size: 0.95rem;
+  transition: color 0.3s;
+}
+
+.nav-links a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  width: 0;
+  height: 2px;
+  background-color: #000000;
+  transition: width 0.3s ease;
+}
+
+.nav-links a:hover {
+  color: #000000;
+}
+
+.nav-links a:hover::after {
+  width: 100%;
+}
+  .container {
+    width: 100%;
+    max-width: 1200px;        /* หรือ 95vw ถ้าต้องการแบบ responsive เต็มจอ */
+    margin: 30px auto;
+    background: white;
+    padding: 30px 40px;
+    border-radius: 16px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+  }
+  
+  .status-header {
+    text-align: center;
+  }
+  
+  .steps {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+/* สีพื้นฐานสำหรับขั้นตอน */
+.step {
+  width: 120px;
+  height: 80px;
+  border-radius: 10px;
+  background: #eee;
+  color: #666;
+  font-weight: bold;
+  text-align: center;
+  line-height: 1.5;
+  padding: 10px;
+  font-size: 14px;
+}
+
+/* ขั้นตอนแรก */
+.step.first {
+  background-color: #007bff;
+  color: white;
+}
+
+/* ขั้นตอนอยู่ระหว่างจัดส่ง */
+.step.active {
+  background-color: #ffc400;
+  color: white;
+}
+
+/* ขั้นตอนสุดท้ายที่ยังไม่รู้ผล */
+.step.result {
+  background-color: #ddd;
+  color: #555;
+}
+
+/* จัดส่งสำเร็จ */
+body.status-success .step.result {
+  background-color: #28a745;
+  color: white;
+}
+
+/* จัดส่งไม่สำเร็จ */
+body.status-failed .step.result {
+  background-color: #b81212;
+  color: white;
+}
+
+/* เมื่อรู้ผลแล้ว ให้ขั้นตอนอื่นเป็นสีเทา */
+body.status-success .step:not(.result),
+body.status-failed .step:not(.result) {
+  background-color: #ccc;
+  color: #555;
+}
+  
+  .timeline {
+    margin: 30px 0;
+    border-left: 3px solid #ccc;
+    padding-left: 20px;
+    position: relative;
+  }
+  
+  .timeline-item {
+    margin-bottom: 20px;
+    position: relative;
+    color: #333;
+  }
+  
+  .timeline-item::before {
+    content: "";
+    position: absolute;
+    left: -12px;
+    top: 5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #ccc;
+  }
+  
+  .timeline-item.active::before {
+    background-color: green;
+  }
+  
+  .timeline-item.green {
+    font-weight: bold;
+    color: green;
+  }
+  
+  .timeline-item.fail::before {
+    background-color: orange;
+  }
+  
+  .btn {
+    background-color: #ff4d4f;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    display: block;
+    margin: 20px auto 0;
+  }
+  
+  /********** FOOTER **********/
+.site-footer {
+  background: #ffffff;
+  color: #000000;
+  padding: 30px 40px 10px;
+  font-size: 14px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  width: 100%;
+  max-width: 1200px; /* Ensures the footer content doesn't stretch too wide */
+  margin-bottom: 10px;
+}
+
+.footer-logo img {
+  height: 60px;
+}
+
+.footer-info,
+.footer-contact {
+  max-width: 300px;
+  text-align: center;
+}
+
+.footer-info p,
+.footer-contact p {
+  font-size: 14px;
+  color: #333;
+}
+
+.footer-login {
+  width: 100%;
+  text-align: right;
+  font-size: 14px;
+  background-color: #666; /* Dark background for the login section */
+  padding: 10px 40px;
+  margin-top: 10px;
+}
+
+.footer-login a {
+  color: #ccc;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.footer-login a:hover {
+  color: #f38908;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: bold
+}
+
+.footer-bottom {
+  width: 100%;
+  text-align: center;
+  padding: 10px;
+  background-color: #555; /* Darker background for the button area */
+}
+  
+  
+  
+  

@@ -1,0 +1,282 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+    
+}
+
+
+
+body{
+    display: flex;
+    height: 100vh;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    background: url('../images/KencatBackground.png') no-repeat center center/cover;
+    overflow-y: scroll;
+}
+
+
+
+/* ส่วนหัวด้านบน */
+.header {
+    width: 100%;
+    height: 60px;
+    background: rgba(255, 153, 51, 0.9); /* พื้นหลังส้มโปร่งแสง */
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* โลโก้ทางซ้าย */
+.header .logo {
+    font-size: 16px;
+    font-weight: bold;
+    color: black;
+}
+
+/* ปุ่ม BACK */
+.header .back-button {
+    text-decoration: none;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 5px 15px;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+.header .back-button{
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.header .back-button:hover {
+   color: #000000;
+   text-decoration: none;
+   font-size: 14px;
+   font-weight: bold
+}
+
+.container {
+    max-width: 700px; /* เพิ่มความกว้างของฟอร์ม */
+    width: 100%;
+    background: #fff;
+    padding: 50px; /* เพิ่ม padding เพื่อให้ฟอร์มดูกว้างขึ้น */
+    border-radius: 15px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    position: absolute;
+    right: 5%; /* ขยับฟอร์มไปทางขวา */
+}
+
+.logo {
+    height: 90px; /* ปรับขนาดโลโก้ */
+}
+
+/* ปรับขนาดของ LOGIN */
+.container .title {
+    font-size: 25px;
+    font-weight: bold;
+    position: relative;
+    display: inline-block;
+    margin-bottom: 15px;
+}
+
+/* เส้นใต้ LOGIN ขยายเต็มข้อความและอยู่ชิดขวา */
+.container .title::before {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 100%; /* เส้นเต็มความกว้างข้อความ */
+    height: 3px;
+    background: linear-gradient(135deg, #FF9933, #FFFF99);
+}
+
+
+/* ช่องใส่ข้อมูล */
+.input-box {
+    width: 100%;
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+.input-box .details {
+    display: block;
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.input-box input {
+    width: 100%;
+    height: 40px;
+    border-radius: 10px;
+    border: none;
+    background: #F5F5F5;
+    padding: 10px;
+    font-size: 16px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    outline: none;
+}
+
+.input-box input:focus {
+    border: 1px solid #FFA500;
+    box-shadow: 0 0 5px rgba(255, 153, 51, 0.5);
+    transition: 0.3s; 
+}
+
+/* ส่วน Employee Role */
+.role-details {
+    margin-top: 10px;
+    text-align: left;
+}
+
+.role-title {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.category {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 10px;
+}
+
+.category label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* ปรับสไตล์ของ radio button */
+.category input[type="radio"] {
+    appearance: none; /* ซ่อน radio ดั้งเดิม */
+    width: 16px;
+    height: 16px;
+    border: 2px solid #aaa;
+    border-radius: 50%;
+    cursor: pointer;
+    position: relative;
+    background-color: white;
+    transition: all 0.3s ease;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2); /* เพิ่มเงา */
+}
+
+/* เมื่อเลือก radio button ให้มีจุดตรงกลาง */
+.category input[type="radio"]:checked::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    background-color: #555;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* ปุ่ม Login */
+.button {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+    width: 100%;  /* Ensure the button's container takes up the full width */
+}
+
+.button input {
+    width: 100%;  /* Ensures the button uses the full width of the parent container */
+    max-width: 200px;  /* This controls the maximum width of the button */
+    height: 30px;  /* Increased height for better visibility */
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #FF8C00, #FFD700);
+    cursor: pointer;
+    color: #fff;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    padding: 0 20px;  /* Added padding to increase the click area */
+}
+
+.error-msg {
+    color: red;
+    font-size: 0.8rem;
+    margin-top: 2px;
+    display: block;
+}
+
+
+
+.button input:hover {
+    background: linear-gradient(135deg, #FF6600, #FFC000);
+}
+
+/*--------test-----------*/
+/* Modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* แสดง Modal */
+.modal.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Modal content */
+.modal-content {
+    background: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    text-align: center;
+    width: 400px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* ปุ่มปิด */
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #333;
+}
+
+/* Error Icon */
+.error-icon {
+    font-size: 30px;
+    margin-bottom: 20px;
+    color: red;
+}
+
+/* Text Style */
+p {
+    font-size: 16px;
+    margin: 5px 0;
+}
+
+strong {
+    font-weight: bold;
+}

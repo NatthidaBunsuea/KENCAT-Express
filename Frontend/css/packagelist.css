@@ -1,0 +1,156 @@
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Arial', sans-serif;
+    background-color: #ffffff;
+}
+
+/*------------ navigation bar-----------*/
+.logo {
+    height: 90px;
+}
+
+.header {
+    width: 100%;
+    max-width: 100vw;
+    height: 60px;
+    background: #FF9C32;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    
+}
+
+.nav-menu {
+    display: flex;
+    justify-content: flex-end;
+    flex-grow: 1;
+ 
+}
+
+.menu-right {
+    display: flex;
+    gap: 20px;
+}
+
+.nav-menu a {
+    text-decoration: none;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 5px;
+}
+
+.nav-menu a.unactive:hover {
+    text-decoration: underline;
+}
+
+.profile-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin :0px 16px;
+}
+
+.parcel-button {
+    background: white;
+    border: 1px solid black;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.profile-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/*------------ content section -----------*/
+.title-search-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px; 
+    margin: 20px auto;
+    max-width: 1400px; 
+}
+
+.package-title {
+    margin: 0;
+}
+
+.search-container {
+    display: flex;
+    align-items: center;
+}
+
+.search-bar {
+    display: flex;
+    align-items: center;
+    border: 2px solid #ccc;
+    border-radius: 25px;
+    overflow: hidden;
+    background: white;
+    width: 100%;  /* Adjust width */
+    max-width: 500px; /* Set max-width for responsiveness */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5)
+}
+
+.search-bar input {
+    padding: 10px;
+    width: 100%; /* Adjust width to 100% */
+    border: none;
+    outline: none;
+    font-size: 16px;
+}
+
+.search-bar button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.parcel-item {
+    background: #E7E7E7;
+    padding: 30px; 
+    border-radius: 8px;
+    box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.1);
+    margin: 20px auto; 
+    max-width: 800px; 
+}
+
+.parcel-item strong {
+    display: inline;
+    font-size: 18px;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.parcel-item p {
+    margin: 5px 0;
+    font-size: 18px;
+}
+
+/* Ensures elements inside the parcel-item don’t overflow */
+.parcel-item {
+    display: flex;
+    flex-direction: column;  /* ทำให้เนื้อหาจัดเรียงแบบ column */
+    gap: 10px;  /* ช่องว่างระหว่างบรรทัด */
+    background: #E7E7E7;
+    padding: 30px; 
+    border-radius: 8px;
+    box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.1);
+    margin: 20px auto; 
+    max-width: 800px; 
+}
+

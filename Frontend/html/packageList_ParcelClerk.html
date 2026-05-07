@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../css/packagelist.css">
+    <title>Kencat express</title>
+</head>
+
+<body>
+    <header class="header">
+        <img src="../images/Kencat_employee_logo.png" class="logo">
+        <nav class="nav-menu">
+            <div class="menu-right">
+                <a href="packageAdd_ParcelClerk.html" class="unactive">เพิ่มรายการพัสดุ</a>
+                <a href="#" class="unactive">รายการพัสดุ</a>
+            </div>
+        </nav>
+        <div class="profile-section">
+            <button class="parcel-button">Parcel clerk</button>
+            <a href="profileEm.html">
+                <img src="../images/Kencat_employee_logo.png" class="profile-icon">
+            </a>
+        </div>
+    </header>
+
+    <main class="content">
+        <div class="parcel-container">
+            <!-- รายการพัสดุ -->
+            <div class="parcel-list">
+                <div class="title-search-container">
+                    <h2 class="package-title">รายการพัสดุ</h2>
+                    <div class="search-container">
+                        <div class="search-bar">
+                            <input type="text" id="searchInput" placeholder="ค้นหาเลขพัสดุ">
+                            <button onclick="searchParcel()">🔍</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="parcel-list"></div>
+                    
+            </div>
+    </main>
+<script src="/js/parcelList.js"></script>
+</body>
+
+</html>

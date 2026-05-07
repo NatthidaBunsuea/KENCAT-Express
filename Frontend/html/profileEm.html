@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kencat express</title>
+    <link rel="stylesheet" href="../css/profileEm.css">
+
+</head>
+<body>
+    <div class="bgcontrainer"></div>
+    <div class="header">
+        <div class="logo">
+            <img src="../images/Logo.png" width ="175px" height="100%">
+        </div>
+        <div class="right-header">
+            
+            <button class="role-btn" onclick="redirectToRole()">up to role</button>
+
+            <img src="../images/profile-icon.png" alt="Profile Picture" class="profile-img" width ="30px" height="30px">
+
+        </div>
+
+    </div>
+    <div class="container">
+        <div class="content">
+        <div class="detail_profile">
+            <img src="../images/profile-icon.png" alt="Profile Picture" class="profile-img">
+            <div class="info">
+                <h2>EmployeeID:<span id="EmployeeID"></span></h2>
+            </div>
+        </div>
+        <div class="section">
+            <h3>ข้อมูลส่วนตัว</h3>
+
+            <p><strong>ชื่อ:</strong> <span id="name"></span></p>
+            <p><strong>อีเมล:</strong> <span id="email"></span></p>
+            <p><strong>ตำแหน่ง:</strong> <span id="role"></span></p>
+            <p><strong>วันเกิด:</strong> <span id="birthday"></span></p>
+            
+            <script src="../js/profile.js"></script>
+            
+        </div>
+        
+        <div class="btn">
+            <button class="logout-btn" onclick="logout()">Logout</button>
+          </div>
+          
+    </div>
+</div>
+</body>
+</html>

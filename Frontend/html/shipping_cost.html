@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kencat express</title>
+    <link rel="stylesheet" href="../css/shipping.css">
+</head>
+<body>
+    <header class="banner-header">
+        <div class="navbar">
+          <div class="logo">
+            <img src="../images/Logo.png" alt="Kencat Express">
+          </div>
+          <nav class="nav-links">
+            <a href="../index.html">ติดตามสถานะพัสดุ</a>
+            <a href="#">คำนวณค่าขนส่งพัสดุ</a>
+          </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="calculator-box">
+            <h2>คํานวณค่าจัดส่งโดยประมาณ (Shipping calculator)</h2>
+            <form>
+                <label for="origin">*ต้นทาง</label>
+                <select id="origin">
+                    <option value="">เลือกต้นทาง</option>
+                </select>
+
+                <label for="destination">*ปลายทาง</label>
+                <select id="destination">
+                    <option value="">เลือกปลายทาง</option>
+                </select>
+
+                <label for="weight">*น้ำหนักพัสดุ</label>
+                <input type="number" id="weight" placeholder="0.00" min="0" step="0.01">
+                <span>KG</span>
+
+                <label>*ประเภทการส่ง</label>
+                <div class="category">
+                    <input type="radio" id="standard" name="shipping_type">
+                    <label for="standard">ส่งมาตรฐาน</label>
+                    <input type="radio" id="express" name="shipping_type">
+                    <label for="express">ส่งด่วน</label>
+                </div>
+                
+                <button type="submit">คำนวณ</button>
+            </form>
+            
+            <div id="result" style="margin-top: 20px; font-weight: bold;"></div>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-content">
+        <div class="footer-logo">
+          <img src="../images/Logo.png" alt="Kencat Express">
+        </div>
+        <div class="footer-info">
+          <strong>ที่อยู่ (Location)</strong><br>
+          บริษัท เคนแคท เอ็กซ์เพรส จำกัด 99 หมู่ที่ 18 ถนนพหลโยธิน ตำบลคลองหนึ่ง<br>
+          อำเภอคลองหลวง จังหวัดปทุมธานี 12120
+        </div>
+        <div class="footer-contact">
+          <strong>ติดต่อ (Contacts)</strong><br>
+          000-0000000
+        </div>
+      </div>
+      <div class="footer-login">
+        <a href="loginEm.html">Log in as employee</a>
+      </div>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- เพิ่ม script ของคุณที่นี่ -->
+    <script src="../js/shipping_calculator.js"></script>
+</body>
+</html>

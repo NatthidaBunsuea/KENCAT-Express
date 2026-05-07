@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kencat express</title>
+    <link rel="stylesheet" href="../css/addpackage.css">
+</head>
+<body>
+
+    <header class="header">
+        <img src="../images/Kencat_employee_logo.png" class="logo">
+        <nav class="nav-menu">
+            <div class="menu-right">
+                <a href="#" class="unactive">เพิ่มรายการพัสดุ</a>
+                <a href="packageList_ParcelClerk.html" class="unactive">รายการพัสดุ</a>
+            </div>
+        </nav>
+        <div class="profile-section">
+            <button class="parcel-button">Parcel clerk</button>
+            <a href="profileEm.html">
+                <img src="../images/Kencat_employee_logo.png" class="profile-icon">
+            </a>
+        </div>
+    </header>
+
+    <main>
+        <h1 class="page-title">เพิ่มรายการพัสดุ</h1>
+
+        <form id="parcelForm">
+        <section class="form-section">
+            <h3>Deliver</h3>
+            <div class="form-box">
+                <label>Name: <input type="text" name="senderName" required ></label>
+                <label>Surname: <input type="text" name="senderSurname" required ></label>
+                <label>PhoneNumber: <input type="text" name="senderPhone" required></label>
+                <label>Homenumber: <input type="text" name="senderHomeNumber" required></label>
+                <label>Soi: <input type="text" name="senderSoi" required></label>
+                <label>Road: <input type="text" name="senderRoad" required></label>
+                <label>District: <input type="text" name="senderDistrict" required></label>
+                <label>Subdistrict: <input type="text" name="senderSubdistrict" required></label>
+                <label>Province: <input type="text" name="senderProvince" required></label>
+                <label>Zipcode: <input type="text" name="senderZipcode" required></label>
+            </div>
+        </section>
+
+        <section class="form-section">
+            <h3>Receiver</h3>
+            <div class="form-box">
+                <label>Name: <input type="text" name="receiverName" required ></label>
+                <label>Surname: <input type="text" name="receiverSurname" required ></label>
+                <label>PhoneNumber: <input type="text" name="receiverPhone" required></label>
+                <label>Homenumber: <input type="text" name="receiverHomeNumber" required></label>
+                <label>Soi: <input type="text" name="receiverSoi" required></label>
+                <label>Road: <input type="text" name="receiverRoad" required></label>
+                <label>District: <input type="text" name="receiverDistrict" required></label>
+                <label>Subdistrict: <input type="text" name="receiverSubdistrict" required></label>
+                <label>Province: <input type="text" name="receiverProvince" required></label>
+                <label>Zipcode: <input type="text" name="receiverZipcode" required></label>
+            </div>
+        </section>
+
+        <section class="form-section">
+            <h3>Parcel</h3>
+            <div class="parcel-box">
+                <label>Deliver Type:
+                    <input type="radio" name="delivery" value="standard"> ส่งมาตรฐาน
+                    <input type="radio" name="delivery" value="express"> ส่งด่วน
+                </label>
+        
+                <label>Weight:</label>
+                <div class="weight-input">
+                    <input type="text" placeholder="ใส่น้ำหนัก" name="weight" >
+                    <span>KG</span>
+                </div>
+            </div>
+        </section>
+        <div class="button_section">
+        <button class="submit-btn" type="submit">เพิ่มพัสดุ</button>
+        <button class="clear-btn"  type="reset" value="reset">Clear</button>
+        </div>
+    </form>
+        
+
+    </main>
+
+    <div id="successModal" class="modal hidden">
+        <div class="modal-content">
+          <span class="close-btn">&times;</span>
+          <h3>เพิ่มพัสดุสำเร็จ</h3>
+          <div class="check-icon">✅</div>
+          <p id="trackId"><strong>Track ID :</strong></p>
+          <p id="parcelId"><strong>Parcel ID :</strong></p>
+          <p id="senderInfo"><strong>Deliver :</strong></p>
+          <p id="senderAddress"><strong>Address :</strong></p>
+          <p id="receiverInfo"><strong>Receiver :</strong></p>
+          <p id="receiverAddress"><strong>Address :</strong></p>
+        </div>
+    </div>
+    
+    <script src="../js/addpackage.js"></script>
+
+</body>
+</html>
+
+  

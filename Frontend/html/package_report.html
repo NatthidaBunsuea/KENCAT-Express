@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kencat express</title>
+    <link rel="stylesheet" href="../css/report.css">
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">
+          <img src="../images/Logo.png" alt="Kencat Express">
+        </div>
+        <nav class="nav-links">
+          <a href="../index.html">ติดตามสถานะพัสดุ</a>
+          <a href="shipping_cost.html">คำนวณค่าขนส่งพัสดุ</a>
+        </nav>
+      </div>
+      
+    <main>
+        <div class="container">
+
+            <h2>รายงานปัญหาพัสดุ (Parcel issue report)</h2>
+            <form>
+              <label for="track-id">*เลขพัสดุ (Track ID)</label>
+              <input type="text" id="track-id" required>              
+
+                <label for="issue">*ปัญหาที่พบ</label>
+                <select id="issue">
+                  <option> - </option>
+                    <option>พัสดุล่าช้า</option>
+                    <option>พัสดุไม่ครบถ้วน</option>
+                    <option>พัสดุเสียหาย</option>
+                    <option>อื่นๆ</option>
+                </select>
+
+                <label for="reason">*เหตุผล</label>
+                <input type="text" id="reason" required>
+
+                <label for="first-name">*ชื่อจริง</label>
+                <input type="text" id="first-name" required>
+
+                <label for="last-name">*นามสกุล</label>
+                <input type="text" id="last-name" required>
+
+                <label for="email">*อีเมล์</label>
+                <input type="email" id="email" required>
+
+                <label for="phone">*เบอร์โทรติดต่อ</label>
+                <input type="tel" id="phone" required>
+
+                <div class="button-group">
+                    <button type="submit" class="submit-btn">ยืนยัน</button>
+                    
+                    <button type="reset" class="cancel-btn" onclick="window.location.href='package_status_failed.html'">ยกเลิก</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-content">
+          <div class="footer-logo">
+            <img src="../images/Logo.png" alt="Kencat Express">
+          </div>
+          <div class="footer-info">
+            <strong>ที่อยู่ (Location)</strong><br>
+            บริษัท เคนแคท เอ็กซ์เพรส จำกัด 99 หมู่ที่ 18 ถนนพหลโยธิน ตำบลคลองหนึ่ง<br>
+            อำเภอคลองหลวง จังหวัดปทุมธานี 12120
+          </div>
+          <div class="footer-contact">
+            <strong>ติดต่อ (Contacts)</strong><br>
+            000-0000000
+          </div>
+        </div>
+        <div class="footer-login">
+          <a href="loginEm.html">Log in as employee</a>
+        </div>
+      </footer>
+
+      <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+      <script>
+        emailjs.init("DnakBg94BH6lQFCXG"); 
+      </script>
+
+      <script src="../js/report.js"></script>
+
+      
+</body>
+</html>

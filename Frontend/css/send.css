@@ -1,0 +1,144 @@
+body {
+  font-family: sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #fff;
+}
+
+/*---------- navigation bar----------*/
+.logo {
+  height: 90px;
+}
+
+.header {
+  width: 100%;
+  max-width: 100vw;
+  height: 60px;
+  background: #FF9C32;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-menu {
+  display: flex;
+  justify-content: flex-end;
+  flex-grow: 1;
+}
+
+.menu-right {
+  display: flex;
+  gap: 20px;
+}
+
+.nav-menu a {
+  text-decoration: none;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  padding: 5px;
+}
+
+.nav-menu a.unactive:hover {
+  text-decoration: underline;
+}
+
+.profile-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin:0px 16px;
+}
+
+.parcel-button {
+  background: white;
+  border: 1px solid black;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.profile-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 20px;
+}
+
+.parcel-list {
+  display: inline; /* เปลี่ยนให้แสดงผลในแนวตั้ง */
+  padding-bottom: 40px;
+  gap: 100px; /* ระยะห่างระหว่างแต่ละพัสดุ */
+  padding-bottom: 40px;
+}
+
+.parcel-item {
+  background-color: #eee;
+  padding: 20px;
+  border-radius: 10px;
+  width: 100%; /* ให้กล่องเต็มความกว้าง */
+  max-width: 700px;
+  margin: 10px auto; /* ให้กล่องพัสดุห่างจากกันในแนวตั้ง */
+  position: relative;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* ทำให้ปุ่ม "ทำการจัดส่ง" อยู่ริมขวาของกล่อง */
+.deliver-btn {
+  position: absolute;
+  right: 20px;  /* อยู่ที่ขวาสุดของกล่อง */
+  top: 50%;
+  transform: translateY(-50%);  /* ทำให้ปุ่มอยู่ตรงกลางในแนวตั้ง */
+  background-color: #FFDB58; /* สีเหลือง */
+  color: #000;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.deliver-btn:hover {
+  background-color: #FFD700;  /* สีเหลืองเข้มขึ้นเมื่อ hover */
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .parcel-item {
+    width: 95%; /* ให้กล่องพัสดุมีความกว้าง 95% เมื่อหน้าจอเล็กลง */
+    padding: 16px;
+  }
+
+  .deliver-btn {
+    position: static;
+    margin-top: 10px;
+    width: 100%;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .header-right {
+    margin-top: 10px;
+    align-self: flex-end;
+  }
+
+  .title {
+    text-align: center;
+  }
+}
