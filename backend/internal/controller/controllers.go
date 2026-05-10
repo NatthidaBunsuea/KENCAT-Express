@@ -42,6 +42,11 @@ func NewAPI(auth *service.AuthService, users *service.UserService, shipping *ser
 // หมวย 7) GET /api/trackings/{trackId}
 func (a *API) GetTracking(w http.ResponseWriter, r *http.Request) {
 	tracking, err := a.tracking.GetTracking(r.Context(), r.PathValue("trackId"))
+
+
+// กัส 5) GET /api/parcels/{parcelId}
+func (a *API) GetParcel(w http.ResponseWriter, r *http.Request) {
+	detail, err := a.parcels.GetParcelDetail(r.Context(), r.PathValue("parcelId"))
 	if err != nil {
 		util.ErrorJSON(w, http.StatusNotFound, err.Error())
 		return
@@ -72,6 +77,31 @@ func (a *API) UpdateTrackingStatus(w http.ResponseWriter, r *http.Request) {
 		req.Location,
 		employeeID,
 	); err != nil {
+	util.WriteJSON(w, http.StatusOK, detail)
+}
+
+// กัส 6) GET /api/shipping/calculate
+func (a *API) CalculateShipping(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query()
+	deliveryType := q.Get("deliveryType")
+	if deliveryType == "" {
+		deliveryType = q.Get("type")
+	}
+
+	weight, err := strconv.ParseFloat(q.Get("weight"), 64)
+	if err != nil {
+		util.ErrorJSON(w, http.StatusBadRequest, "invalid weight")
+		return
+	}
+
+	quote, err := a.shipping.Calculate(
+		r.Context(),
+		q.Get("origin"),
+		q.Get("destination"),
+		deliveryType,
+		weight,
+	)
+	if err != nil {
 		util.ErrorJSON(w, http.StatusBadRequest, err.Error())
 		return
 	}
@@ -83,3 +113,5 @@ func (a *API) UpdateTrackingStatus(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+	util.WriteJSON(w, http.StatusOK, quote)
+}
