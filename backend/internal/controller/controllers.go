@@ -38,12 +38,6 @@ func NewAPI(auth *service.AuthService, users *service.UserService, shipping *ser
 		tokenTTL:  tokenTTL,
 	}
 }
-
-// หมวย 7) GET /api/trackings/{trackId}
-func (a *API) GetTracking(w http.ResponseWriter, r *http.Request) {
-	tracking, err := a.tracking.GetTracking(r.Context(), r.PathValue("trackId"))
-
-
 // กัส 5) GET /api/parcels/{parcelId}
 func (a *API) GetParcel(w http.ResponseWriter, r *http.Request) {
 	detail, err := a.parcels.GetParcelDetail(r.Context(), r.PathValue("parcelId"))
@@ -53,31 +47,6 @@ func (a *API) GetParcel(w http.ResponseWriter, r *http.Request) {
 	}
 
 	util.WriteJSON(w, http.StatusOK, tracking)
-}
-
-// หมวย 8) PUT /api/trackings/{trackId}/status
-func (a *API) UpdateTrackingStatus(w http.ResponseWriter, r *http.Request) {
-	var req dto.TrackingStatusUpdateRequest
-	if err := util.DecodeJSON(r, &req); err != nil {
-		util.ErrorJSON(w, http.StatusBadRequest, err.Error())
-		return
-	}
-
-	if strings.TrimSpace(req.Status) == "" {
-		util.ErrorJSON(w, http.StatusBadRequest, "status is required")
-		return
-	}
-
-	employeeID := employeeIDFromClaims(r)
-	if err := a.tracking.UpdateStatus(
-		r.Context(),
-		r.PathValue("trackId"),
-		req.Status,
-		req.Description,
-		req.Location,
-		employeeID,
-	); err != nil {
-	util.WriteJSON(w, http.StatusOK, detail)
 }
 
 // กัส 6) GET /api/shipping/calculate
@@ -114,4 +83,33 @@ func (a *API) CalculateShipping(w http.ResponseWriter, r *http.Request) {
 }
 
 	util.WriteJSON(w, http.StatusOK, quote)
+}
+
+// หมวย 7) GET /api/trackings/{trackId}
+func (a *API) GetTracking(w http.ResponseWriter, r *http.Request) {
+	tracking, err := a.tracking.GetTracking(r.Context(), r.PathValue("trackId"))
+
+// หมวย 8) PUT /api/trackings/{trackId}/status
+func (a *API) UpdateTrackingStatus(w http.ResponseWriter, r *http.Request) {
+	var req dto.TrackingStatusUpdateRequest
+	if err := util.DecodeJSON(r, &req); err != nil {
+		util.ErrorJSON(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if strings.TrimSpace(req.Status) == "" {
+		util.ErrorJSON(w, http.StatusBadRequest, "status is required")
+		return
+	}
+
+	employeeID := employeeIDFromClaims(r)
+	if err := a.tracking.UpdateStatus(
+		r.Context(),
+		r.PathValue("trackId"),
+		req.Status,
+		req.Description,
+		req.Location,
+		employeeID,
+	); err != nil {
+	util.WriteJSON(w, http.StatusOK, detail)
 }
