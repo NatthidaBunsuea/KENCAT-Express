@@ -39,6 +39,9 @@ func NewAPI(auth *service.AuthService, users *service.UserService, shipping *ser
 	}
 }
 
+// หมวย 7) GET /api/trackings/{trackId}
+func (a *API) GetTracking(w http.ResponseWriter, r *http.Request) {
+	tracking, err := a.tracking.GetTracking(r.Context(), r.PathValue("trackId"))
 
 
 // กัส 5) GET /api/parcels/{parcelId}
@@ -49,6 +52,31 @@ func (a *API) GetParcel(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	util.WriteJSON(w, http.StatusOK, tracking)
+}
+
+// หมวย 8) PUT /api/trackings/{trackId}/status
+func (a *API) UpdateTrackingStatus(w http.ResponseWriter, r *http.Request) {
+	var req dto.TrackingStatusUpdateRequest
+	if err := util.DecodeJSON(r, &req); err != nil {
+		util.ErrorJSON(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if strings.TrimSpace(req.Status) == "" {
+		util.ErrorJSON(w, http.StatusBadRequest, "status is required")
+		return
+	}
+
+	employeeID := employeeIDFromClaims(r)
+	if err := a.tracking.UpdateStatus(
+		r.Context(),
+		r.PathValue("trackId"),
+		req.Status,
+		req.Description,
+		req.Location,
+		employeeID,
+	); err != nil {
 	util.WriteJSON(w, http.StatusOK, detail)
 }
 
@@ -77,6 +105,13 @@ func (a *API) CalculateShipping(w http.ResponseWriter, r *http.Request) {
 		util.ErrorJSON(w, http.StatusBadRequest, err.Error())
 		return
 	}
+
+	util.SuccessJSON(w, http.StatusOK, map[string]interface{}{
+		"message": "status updated",
+		"trackID": r.PathValue("trackId"),
+		"status":  util.NormalizeStatus(req.Status),
+	})
+}
 
 	util.WriteJSON(w, http.StatusOK, quote)
 }
