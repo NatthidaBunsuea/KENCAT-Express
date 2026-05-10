@@ -20,7 +20,17 @@ func New(api *controller.API, cfg config.Config, frontendDir string) http.Handle
 		return middleware.Chain(h, mws...)
 	}
 
-  //กัส
+	
+//กัส
+	mux.Handle("GET /api/parcels/{parcelId}", wrap(http.HandlerFunc(api.GetParcel), middleware.RequireAuth(cfg.JWTSecret)))
+	mux.Handle("GET /api/shipping/calculate", wrap(http.HandlerFunc(api.CalculateShipping)))
+
+	
+//กัส
+	mux.HandleFunc("GET /docs/openapi.yaml", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "docs/openapi.yaml")
+	})
+//กัส
 	fileServer := http.FileServer(http.Dir(frontendDir))
 	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/api" || strings.HasPrefix(r.URL.Path, "/api/") {
