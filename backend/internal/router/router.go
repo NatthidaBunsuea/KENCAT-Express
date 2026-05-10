@@ -19,18 +19,13 @@ func New(api *controller.API, cfg config.Config, frontendDir string) http.Handle
 		mws = append(mws, auth...)
 		return middleware.Chain(h, mws...)
 	}
-
-	//หมวย
-	mux.Handle("GET /api/trackings/{trackId}", wrap(http.HandlerFunc(api.GetTracking)))
-	mux.Handle("PUT /api/trackings/{trackId}/status", wrap(http.HandlerFunc(api.UpdateTrackingStatus), middleware.RequireAuth(cfg.JWTSecret)))
-
-  //กัส
 	
 //กัส
 	mux.Handle("GET /api/parcels/{parcelId}", wrap(http.HandlerFunc(api.GetParcel), middleware.RequireAuth(cfg.JWTSecret)))
 	mux.Handle("GET /api/shipping/calculate", wrap(http.HandlerFunc(api.CalculateShipping)))
-
-	
+//หมวย
+	mux.Handle("GET /api/trackings/{trackId}", wrap(http.HandlerFunc(api.GetTracking)))
+	mux.Handle("PUT /api/trackings/{trackId}/status", wrap(http.HandlerFunc(api.UpdateTrackingStatus), middleware.RequireAuth(cfg.JWTSecret)))
 //กัส
 	mux.HandleFunc("GET /docs/openapi.yaml", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "docs/openapi.yaml")
