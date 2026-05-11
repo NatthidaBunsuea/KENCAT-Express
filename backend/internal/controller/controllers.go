@@ -113,3 +113,44 @@ func (a *API) UpdateTrackingStatus(w http.ResponseWriter, r *http.Request) {
 	); err != nil {
 	util.WriteJSON(w, http.StatusOK, detail)
 }
+
+// โอม 9) GET /api/messenger/tasks
+func (a *API) GetMessengerTasks(w http.ResponseWriter, r *http.Request) {
+	var employeeID int64
+	if claims, ok := middleware.ClaimsFromContext(r.Context()); ok {
+		employeeID = claims.EmployeeID
+	}
+
+	items, err := a.messenger.ListTasks(r.Context(), employeeID)
+	if err != nil {
+		util.ErrorJSON(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	util.WriteJSON(w, http.StatusOK, items)
+}
+
+// โอม 10) POST /api/vehicle/assign
+func (a *API) AssignVehicle(w http.ResponseWriter, r *http.Request) {
+	var req dto.VehicleAssignRequest
+	if err := util.DecodeJSON(r, &req); err != nil {
+		util.ErrorJSON(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	if req.MessengerID == 0 {
+		if claims, ok := middleware.ClaimsFromContext(r.Context()); ok {
+			req.MessengerID = claims.EmployeeID
+		}
+	}
+
+	if err := a.vehicles.AssignVehicle(r.Context(), req.TrackID, req.VehicleID, req.MessengerID); err != nil {
+		util.ErrorJSON(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	util.SuccessJSON(w, http.StatusOK, map[string]interface{}{
+		"message": "vehicle assigned",
+		"trackID": req.TrackID,
+	})
+}
