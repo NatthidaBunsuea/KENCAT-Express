@@ -271,6 +271,98 @@ VALUES (?, ?, ?, ?, ?, ?, NOW())`, parcelID, input.TrackID, input.Status, input.
 	}
 	return tx.Commit()
 
+// โอม
+func (s *Store) ListMessengerTasks(ctx context.Context, employeeID int64) ([]domain.ParcelListItem, error) {
+	query := `
+SELECT p.parcel_code, p.tracking_code,
+       ru.first_name, ru.last_name, ru.phone,
+       ra.home_number, COALESCE(ra.soi, ''), COALESCE(ra.road, ''), ra.subdistrict, ra.district, ra.province, ra.zipcode,
+       p.status, p.deposited_at, p.messenger_employee_id
+FROM parcels p
+JOIN users ru ON ru.id = p.receiver_user_id
+JOIN user_addresses ra ON ra.id = p.receiver_address_id`
+	args := []interface{}{}
+	if employeeID > 0 {
+		query += ` WHERE p.messenger_employee_id = ? OR p.messenger_employee_id IS NULL`
+		args = append(args, employeeID)
+	}
+	query += ` ORDER BY p.id DESC`
+	rows, err := s.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []domain.ParcelListItem
+	for rows.Next() {
+		var item domain.ParcelListItem
+		var messengerID sql.NullInt64
+		if err := rows.Scan(&item.ParcelID, &item.TrackID, &item.ReceiverName, &item.ReceiverSurname, &item.ReceiverTel, &item.HomeNumber, &item.Soi, &item.Road, &item.Subdistrict, &item.DistrictName, &item.ProvinceName, &item.Zipcode, &item.Status, &item.DepositDate, &messengerID); err != nil {
+			return nil, err
+		}
+		if messengerID.Valid {
+			id := messengerID.Int64
+			item.AssignedMessengerID = &id
+		}
+		items = append(items, item)
+	}
+	return items, rows.Err()
+}
+
+// โอม
+func (s *Store) AssignVehicle(ctx context.Context, input domain.VehicleAssignmentInput) error {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	var parcelID int64
+	if err := tx.QueryRowContext(ctx, `SELECT id FROM parcels WHERE tracking_code = ? LIMIT 1`, input.TrackID).Scan(&parcelID); err != nil {
+		return err
+	}
+	if _, err := tx.ExecContext(ctx, `UPDATE parcels SET vehicle_id = ?, messenger_employee_id = ?, updated_at = NOW() WHERE tracking_code = ?`, input.VehicleID, input.MessengerEmployeeID, input.TrackID); err != nil {
+		return err
+	}
+	if _, err := tx.ExecContext(ctx, `INSERT INTO vehicle_assignments (vehicle_id, parcel_id, messenger_employee_id, status, assigned_at) VALUES (?, ?, ?, 'ASSIGNED', NOW())`, input.VehicleID, parcelID, input.MessengerEmployeeID); err != nil {
+		return err
+	}
+	return tx.Commit()
+}
+
+// โอม
+func (s *Store) FindVehicleByID(ctx context.Context, id int64) (*domain.Vehicle, error) {
+	const q = `
+SELECT id, vehicle_code, type, license_plate, status, assigned_employee_id, created_at, updated_at
+FROM vehicles
+WHERE id = ?
+LIMIT 1`
+	var vehicle domain.Vehicle
+	var assignedID sql.NullInt64
+	if err := s.db.QueryRowContext(ctx, q, id).Scan(&vehicle.ID, &vehicle.VehicleCode, &vehicle.Type, &vehicle.LicensePlate, &vehicle.Status, &assignedID, &vehicle.CreatedAt, &vehicle.UpdatedAt); err != nil {
+		return nil, err
+	}
+	if assignedID.Valid {
+		id := assignedID.Int64
+		vehicle.AssignedEmployeeID = &id
+	}
+	return &vehicle, nil
+}
+
+// โอม
+func (s *Store) AssignVehicleToEmployee(ctx context.Context, vehicleID, employeeID int64) error {
+	res, err := s.db.ExecContext(ctx, `UPDATE vehicles SET assigned_employee_id = ?, status = 'IN_USE', updated_at = NOW() WHERE id = ?`, employeeID, vehicleID)
+	if err != nil {
+		return err
+	}
+	affected, err := res.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if affected == 0 {
+		return sql.ErrNoRows
+	}
+	return nil
+}
+	
 // กัส
 func insertUserAndAddressTx(ctx context.Context, tx *sql.Tx, person domain.PersonAddress) (int64, int64, error) {
 	userRes, err := tx.ExecContext(ctx, `INSERT INTO users (first_name, last_name, phone, email) VALUES (?, ?, ?, ?)`, person.FirstName, person.LastName, person.Phone, nullString(person.Email))
