@@ -38,6 +38,51 @@ func NewAPI(auth *service.AuthService, users *service.UserService, shipping *ser
 		tokenTTL:  tokenTTL,
 	}
 }
+
+// ด้า 1) POST /api/auth/login
+func (a *API) Login(w http.ResponseWriter, r *http.Request) {
+	var req dto.LoginRequest
+	if err := util.DecodeJSON(r, &req); err != nil {
+		util.ErrorJSON(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	resp, err := a.auth.Login(r.Context(), req)
+	if err != nil {
+		util.ErrorJSON(w, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     util.CookieName,
+		Value:    resp.Token,
+		Path:     "/",
+		HttpOnly: true,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   int(a.tokenTTL.Seconds()),
+	})
+
+	util.WriteJSON(w, http.StatusOK, resp)
+}
+
+// ด้า 2) GET /api/users/{userId}
+func (a *API) GetUserByID(w http.ResponseWriter, r *http.Request) {
+	userID, err := strconv.ParseInt(r.PathValue("userId"), 10, 64)
+	if err != nil || userID <= 0 {
+		util.ErrorJSON(w, http.StatusBadRequest, "invalid user id")
+		return
+	}
+
+	user, err := a.users.GetCustomerByID(r.Context(), userID)
+	if err != nil {
+		util.ErrorJSON(w, http.StatusNotFound, err.Error())
+		return
+	}
+
+	util.WriteJSON(w, http.StatusOK, user)
+}
+
+
 // กัส 5) GET /api/parcels/{parcelId}
 func (a *API) GetParcel(w http.ResponseWriter, r *http.Request) {
 	detail, err := a.parcels.GetParcelDetail(r.Context(), r.PathValue("parcelId"))
