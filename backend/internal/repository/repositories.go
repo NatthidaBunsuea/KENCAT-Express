@@ -20,6 +20,82 @@ func New(db *sql.DB) *Store {
 	return &Store{db: db}
 }
 
+// ด้า Find employee by employee code or email
+func (s *Store) FindEmployeeByIdentity(ctx context.Context, identity string) (*domain.Employee, error) {
+	const q = `
+SELECT id, employee_code, email, password_hash, first_name, last_name, phone, role, birth_date, is_active, created_at, updated_at
+FROM employees
+WHERE employee_code = ? OR email = ?
+LIMIT 1`
+	row := s.db.QueryRowContext(ctx, q, identity, identity)
+	return scanEmployee(row)
+}
+
+// ด้า Find employee by employee id
+func (s *Store) FindEmployeeByID(ctx context.Context, id int64) (*domain.Employee, error) {
+	const q = `
+SELECT id, employee_code, email, password_hash, first_name, last_name, phone, role, birth_date, is_active, created_at, updated_at
+FROM employees
+WHERE id = ?
+LIMIT 1`
+	row := s.db.QueryRowContext(ctx, q, id)
+	return scanEmployee(row)
+}
+
+// ด้า Find customer by user ID and load active address
+func (s *Store) FindCustomerByID(ctx context.Context, id int64) (*domain.User, error) {
+	const q = `
+SELECT id, first_name, last_name, phone, COALESCE(email, ''), created_at, updated_at
+FROM users
+WHERE id = ?
+LIMIT 1`
+	var user domain.User
+	if err := s.db.QueryRowContext(ctx, q, id).Scan(
+		&user.ID,
+		&user.FirstName,
+		&user.LastName,
+		&user.Phone,
+		&user.Email,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	); err != nil {
+		return nil, err
+	}
+	addr, err := s.FindActiveAddressByUserID(ctx, user.ID)
+	if err == nil {
+		user.Address = addr
+	}
+	return &user, nil
+}
+
+// ด้า Find the latest active address of a user
+func (s *Store) FindActiveAddressByUserID(ctx context.Context, userID int64) (*domain.UserAddress, error) {
+	const q = `
+SELECT id, user_id, home_number, COALESCE(soi, ''), COALESCE(road, ''), subdistrict, district, province, zipcode, is_active, created_at, updated_at
+FROM user_addresses
+WHERE user_id = ? AND is_active = TRUE
+ORDER BY id DESC
+LIMIT 1`
+	var addr domain.UserAddress
+	if err := s.db.QueryRowContext(ctx, q, userID).Scan(
+		&addr.ID,
+		&addr.UserID,
+		&addr.HomeNumber,
+		&addr.Soi,
+		&addr.Road,
+		&addr.Subdistrict,
+		&addr.District,
+		&addr.Province,
+		&addr.Zipcode,
+		&addr.IsActive,
+		&addr.CreatedAt,
+		&addr.UpdatedAt,
+	); err != nil {
+		return nil, err
+	}
+	return &addr, nil
+}
+
 // กัส
 func (s *Store) FindMatchedRate(ctx context.Context, zoneCode, deliveryType string, weight float64) (*domain.ShippingRate, error) {
 	const q = `
