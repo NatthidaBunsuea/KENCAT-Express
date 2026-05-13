@@ -19,6 +19,11 @@ func New(api *controller.API, cfg config.Config, frontendDir string) http.Handle
 		mws = append(mws, auth...)
 		return middleware.Chain(h, mws...)
 	}
+
+//ด้า
+	mux.Handle("POST /api/auth/login", wrap(http.HandlerFunc(api.Login)))
+	mux.Handle("GET /api/users/{userId}", wrap(http.HandlerFunc(api.GetUserByID), middleware.RequireAuth(cfg.JWTSecret)))
+	
 	
 //กัส
 	mux.Handle("GET /api/parcels/{parcelId}", wrap(http.HandlerFunc(api.GetParcel), middleware.RequireAuth(cfg.JWTSecret)))
