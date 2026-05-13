@@ -26,6 +26,9 @@ func New(api *controller.API, cfg config.Config, frontendDir string) http.Handle
 //หมวย
 	mux.Handle("GET /api/trackings/{trackId}", wrap(http.HandlerFunc(api.GetTracking)))
 	mux.Handle("PUT /api/trackings/{trackId}/status", wrap(http.HandlerFunc(api.UpdateTrackingStatus), middleware.RequireAuth(cfg.JWTSecret)))
+//โอม
+	mux.Handle("GET /api/messenger/tasks", wrap(http.HandlerFunc(api.GetMessengerTasks), middleware.RequireAuth(cfg.JWTSecret)))
+	mux.Handle("POST /api/vehicle/assign", wrap(http.HandlerFunc(api.AssignVehicle), middleware.RequireAuth(cfg.JWTSecret)))
 //กัส
 	mux.HandleFunc("GET /docs/openapi.yaml", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "docs/openapi.yaml")
