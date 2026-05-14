@@ -82,6 +82,41 @@ func (a *API) GetUserByID(w http.ResponseWriter, r *http.Request) {
 	util.WriteJSON(w, http.StatusOK, user)
 }
 
+// วุ่น 3) POST /api/parcels
+func (a *API) CreateParcel(w http.ResponseWriter, r *http.Request) {
+	var req dto.ParcelRequest
+	if err := util.DecodeJSON(r, &req); err != nil {
+		util.ErrorJSON(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	var clerkID *int64
+	if claims, ok := middleware.ClaimsFromContext(r.Context()); ok {
+		role := util.NormalizeRole(claims.Role)
+		if role == util.RoleParcelClerk || role == util.RoleAdmin {
+			clerkID = &claims.EmployeeID
+		}
+	}
+
+	resp, err := a.parcels.CreateParcel(r.Context(), req, clerkID)
+	if err != nil {
+		util.ErrorJSON(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	util.WriteJSON(w, http.StatusCreated, resp)
+}
+
+// วุ่น 4) GET /api/parcels
+func (a *API) ListParcels(w http.ResponseWriter, r *http.Request) {
+	items, err := a.parcels.ListParcels(r.Context())
+	if err != nil {
+		util.ErrorJSON(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	util.WriteJSON(w, http.StatusOK, items)
+}
 
 // กัส 5) GET /api/parcels/{parcelId}
 func (a *API) GetParcel(w http.ResponseWriter, r *http.Request) {
