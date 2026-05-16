@@ -141,6 +141,131 @@ LIMIT 1`
 	return &rate, nil
 }
 
+// วุ่น
+func (s *Store) CreateParcelGraph(ctx context.Context, input domain.ParcelCreateInput) (*domain.ParcelCreated, error) {
+	tx, err := s.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+	defer tx.Rollback()
+
+	senderID, senderAddrID, err := insertUserAndAddressTx(ctx, tx, input.Sender)
+	if err != nil {
+		return nil, err
+	}
+	receiverID, receiverAddrID, err := insertUserAndAddressTx(ctx, tx, input.Receiver)
+	if err != nil {
+		return nil, err
+	}
+
+	if input.DepositedAt.IsZero() {
+		input.DepositedAt = time.Now()
+	}
+	res, err := tx.ExecContext(ctx, `
+INSERT INTO parcels (
+	parcel_code, tracking_code, sender_user_id, sender_address_id, receiver_user_id, receiver_address_id,
+	clerk_employee_id, messenger_employee_id, vehicle_id, delivery_type, weight, shipping_cost,
+	origin_zone, destination_zone, status, notes, deposited_at
+) VALUES (?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?, ?, ?, ?, ?, ?, ?, ?)`,
+		input.ParcelCode,
+		input.TrackingCode,
+		senderID,
+		senderAddrID,
+		receiverID,
+		receiverAddrID,
+		input.ClerkEmployeeID,
+		input.DeliveryType,
+		input.Weight,
+		input.ShippingCost,
+		input.OriginZone,
+		input.DestinationZone,
+		input.Status,
+		input.Notes,
+		input.DepositedAt,
+	)
+	if err != nil {
+		return nil, err
+	}
+	parcelID, err := res.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+
+	event := input.InitialEvent
+	if event.Status == "" {
+		event.Status = input.Status
+	}
+	if event.CreatedAt.IsZero() {
+		event.CreatedAt = input.DepositedAt
+	}
+	if _, err := tx.ExecContext(ctx, `
+INSERT INTO tracking_events (parcel_id, tracking_code, status, location, description, updated_by_employee_id, created_at)
+VALUES (?, ?, ?, ?, ?, ?, ?)`,
+		parcelID,
+		input.TrackingCode,
+		event.Status,
+		event.Location,
+		event.Description,
+		event.UpdatedByEmployeeID,
+		event.CreatedAt,
+	); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return nil, err
+	}
+	return &domain.ParcelCreated{ParcelID: parcelID, ParcelCode: input.ParcelCode, TrackingCode: input.TrackingCode, ShippingCost: input.ShippingCost}, nil
+}
+
+// วุ่น
+func (s *Store) ListParcels(ctx context.Context) ([]domain.ParcelListItem, error) {
+	const q = `
+SELECT p.parcel_code, p.tracking_code,
+       ru.first_name, ru.last_name, ru.phone,
+       ra.home_number, COALESCE(ra.soi, ''), COALESCE(ra.road, ''), ra.subdistrict, ra.district, ra.province, ra.zipcode,
+       p.status, p.deposited_at, p.messenger_employee_id
+FROM parcels p
+JOIN users ru ON ru.id = p.receiver_user_id
+JOIN user_addresses ra ON ra.id = p.receiver_address_id
+ORDER BY p.id DESC`
+	rows, err := s.db.QueryContext(ctx, q)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := make([]domain.ParcelListItem, 0)
+	for rows.Next() {
+		var item domain.ParcelListItem
+		var messengerID sql.NullInt64
+		if err := rows.Scan(
+			&item.ParcelID,
+			&item.TrackID,
+			&item.ReceiverName,
+			&item.ReceiverSurname,
+			&item.ReceiverTel,
+			&item.HomeNumber,
+			&item.Soi,
+			&item.Road,
+			&item.Subdistrict,
+			&item.DistrictName,
+			&item.ProvinceName,
+			&item.Zipcode,
+			&item.Status,
+			&item.DepositDate,
+			&messengerID,
+		); err != nil {
+			return nil, err
+		}
+		if messengerID.Valid {
+			id := messengerID.Int64
+			item.AssignedMessengerID = &id
+		}
+		items = append(items, item)
+	}
+	return items, rows.Err()
+}
+
 // กัส
 func (s *Store) GetParcelDetail(ctx context.Context, identifier string) (*domain.ParcelDetail, error) {
 	const q = `
