@@ -44,6 +44,16 @@ func New(api *controller.API, cfg config.Config, frontendDir string) http.Handle
 //โอม
 	mux.Handle("GET /api/messenger/tasks", wrap(http.HandlerFunc(api.GetMessengerTasks), middleware.RequireAuth(cfg.JWTSecret)))
 	mux.Handle("POST /api/vehicle/assign", wrap(http.HandlerFunc(api.AssignVehicle), middleware.RequireAuth(cfg.JWTSecret)))
+//ยีน
+	mux.Handle("POST /api/reports", wrap(http.HandlerFunc(api.CreateReport)))
+	mux.Handle(
+		"GET /api/reports",
+		wrap(
+			http.HandlerFunc(api.ListReports),
+			middleware.RequireAuth(cfg.JWTSecret),
+			middleware.RequireRoles("PARCEL_CLERK", "ADMIN"),
+		),
+	)
 //กัส
 	mux.HandleFunc("GET /docs/openapi.yaml", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "docs/openapi.yaml")
