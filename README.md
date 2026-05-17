@@ -90,6 +90,7 @@ PASSWORD_SALT=kencat-express-salt
 ```bash
 cd KencatExpress
 cd backend
+go mod init kencatexpress/backend
 go mod tidy
 go run ./cmd/api/main.go
 ```
