@@ -367,7 +367,6 @@ LIMIT 1`
 	return &detail, nil
 }
 
-
 // หมวย
 func (s *Store) GetParcelTrackingView(ctx context.Context, trackID string) (*domain.ParcelTrackingView, error) {
 	const q = `
@@ -471,6 +470,7 @@ VALUES (?, ?, ?, ?, ?, ?, NOW())`, parcelID, input.TrackID, input.Status, input.
 		return err
 	}
 	return tx.Commit()
+}
 
 // โอม
 func (s *Store) ListMessengerTasks(ctx context.Context, employeeID int64) ([]domain.ParcelListItem, error) {
