@@ -234,3 +234,44 @@ func (a *API) AssignVehicle(w http.ResponseWriter, r *http.Request) {
 		"trackID": req.TrackID,
 	})
 }
+
+// ยีน 11) POST /api/reports
+func (a *API) CreateReport(w http.ResponseWriter, r *http.Request) {
+	var req dto.ReportCreateRequest
+	if err := util.DecodeJSON(r, &req); err != nil {
+		util.ErrorJSON(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	report, err := a.reports.CreateReport(r.Context(), req)
+	if err != nil {
+		util.ErrorJSON(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	util.SuccessJSON(w, http.StatusCreated, map[string]interface{}{
+		"message":    "report created",
+		"reportCode": report.ReportCode,
+		"trackID":    report.TrackingCode,
+	})
+}
+
+// ยีน 12) GET /api/reports
+func (a *API) ListReports(w http.ResponseWriter, r *http.Request) {
+	reports, err := a.reports.ListReports(r.Context())
+	if err != nil {
+		util.ErrorJSON(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	util.WriteJSON(w, http.StatusOK, reports)
+}
+
+// ยีน 12) GET /api/reports
+func employeeIDFromClaims(r *http.Request) *int64 {
+	if claims, ok := middleware.ClaimsFromContext(r.Context()); ok {
+		id := claims.EmployeeID
+		return &id
+	}
+	return nil
+}

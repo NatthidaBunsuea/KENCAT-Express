@@ -563,6 +563,43 @@ func (s *Store) AssignVehicleToEmployee(ctx context.Context, vehicleID, employee
 	}
 	return nil
 }
+
+// ยีน
+func (s *Store) CreateReport(ctx context.Context, report *domain.Report) (int64, error) {
+	res, err := s.db.ExecContext(ctx, `
+INSERT INTO reports (report_code, parcel_id, tracking_code, reporter_first_name, reporter_last_name, reporter_phone, reporter_email, issue_type, subject, description, status)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, report.ReportCode, report.ParcelID, report.TrackingCode, report.ReporterFirstName, report.ReporterLastName, report.ReporterPhone, report.ReporterEmail, report.IssueType, report.Subject, report.Description, report.Status)
+	if err != nil {
+		return 0, err
+	}
+	return res.LastInsertId()
+}
+
+// ยีน
+func (s *Store) ListReports(ctx context.Context) ([]domain.Report, error) {
+	rows, err := s.db.QueryContext(ctx, `
+SELECT id, report_code, parcel_id, tracking_code, reporter_first_name, reporter_last_name, COALESCE(reporter_phone, ''), COALESCE(reporter_email, ''), issue_type, subject, description, status, created_at, updated_at
+FROM reports
+ORDER BY created_at DESC`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var reports []domain.Report
+	for rows.Next() {
+		var report domain.Report
+		var parcelID sql.NullInt64
+		if err := rows.Scan(&report.ID, &report.ReportCode, &parcelID, &report.TrackingCode, &report.ReporterFirstName, &report.ReporterLastName, &report.ReporterPhone, &report.ReporterEmail, &report.IssueType, &report.Subject, &report.Description, &report.Status, &report.CreatedAt, &report.UpdatedAt); err != nil {
+			return nil, err
+		}
+		if parcelID.Valid {
+			id := parcelID.Int64
+			report.ParcelID = &id
+		}
+		reports = append(reports, report)
+	}
+	return reports, rows.Err()
+}
 	
 // กัส
 func insertUserAndAddressTx(ctx context.Context, tx *sql.Tx, person domain.PersonAddress) (int64, int64, error) {
