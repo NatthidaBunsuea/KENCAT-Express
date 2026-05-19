@@ -1,0 +1,1706 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>api: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">kencatexpress/backend/cmd/api/main.go (0.0%)</option>
+				
+				<option value="file1">kencatexpress/backend/internal/config/config.go (0.0%)</option>
+				
+				<option value="file2">kencatexpress/backend/internal/controller/controllers.go (0.0%)</option>
+				
+				<option value="file3">kencatexpress/backend/internal/database/database.go (0.0%)</option>
+				
+				<option value="file4">kencatexpress/backend/internal/middleware/middleware.go (0.0%)</option>
+				
+				<option value="file5">kencatexpress/backend/internal/router/router.go (0.0%)</option>
+				
+				<option value="file6">kencatexpress/backend/internal/service/auth_service.go (95.5%)</option>
+				
+				<option value="file7">kencatexpress/backend/internal/service/messenger_service.go (100.0%)</option>
+				
+				<option value="file8">kencatexpress/backend/internal/service/parcel_service.go (100.0%)</option>
+				
+				<option value="file9">kencatexpress/backend/internal/service/report_service.go (100.0%)</option>
+				
+				<option value="file10">kencatexpress/backend/internal/service/shipping_service.go (95.2%)</option>
+				
+				<option value="file11">kencatexpress/backend/internal/service/tracking_service.go (90.7%)</option>
+				
+				<option value="file12">kencatexpress/backend/internal/service/user_service.go (100.0%)</option>
+				
+				<option value="file13">kencatexpress/backend/internal/service/vehicle_service.go (100.0%)</option>
+				
+				<option value="file14">kencatexpress/backend/internal/util/common.go (0.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">// หมวย
+package main
+
+import (
+        "context"
+        "log"
+        "net/http"
+        "os"
+        "path/filepath"
+        "time"
+
+        "kencatexpress/backend/internal/config"
+        "kencatexpress/backend/internal/controller"
+        "kencatexpress/backend/internal/database"
+        "kencatexpress/backend/internal/repository"
+        "kencatexpress/backend/internal/router"
+        "kencatexpress/backend/internal/service"
+)
+
+func main() <span class="cov0" title="0">{
+        cfg := config.Load()
+
+        db, err := database.Open(cfg)
+        if err != nil </span><span class="cov0" title="0">{
+                log.Fatalf("database connection failed: %v", err)
+        }</span>
+        <span class="cov0" title="0">defer db.Close()
+
+        ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+        defer cancel()
+        if err := database.Bootstrap(ctx, db, cfg.AutoMigrate, cfg.AutoSeed); err != nil </span><span class="cov0" title="0">{
+                log.Fatalf("database bootstrap failed: %v", err)
+        }</span>
+
+        <span class="cov0" title="0">store := repository.New(db)
+        authSvc := service.NewAuthService(store, cfg.JWTSecret, cfg.PasswordSalt, cfg.JWTTTL)
+        userSvc := service.NewUserService(store, store)
+        shippingSvc := service.NewShippingService(store)
+        parcelSvc := service.NewParcelService(store, shippingSvc)
+        trackingSvc := service.NewTrackingService(store)
+        messengerSvc := service.NewMessengerService(store)
+        vehicleSvc := service.NewVehicleService(store, store)
+        reportSvc := service.NewReportService(store, store)
+
+        api := controller.NewAPI(authSvc, userSvc, shippingSvc, parcelSvc, trackingSvc, messengerSvc, vehicleSvc, reportSvc, cfg.JWTTTL)
+
+        frontendDir := cfg.FrontendDir
+        if !filepath.IsAbs(frontendDir) </span><span class="cov0" title="0">{
+                cwd, _ := os.Getwd()
+                frontendDir = filepath.Join(cwd, frontendDir)
+        }</span>
+
+        <span class="cov0" title="0">srv := &amp;http.Server{
+                Addr:              ":" + cfg.Port,
+                Handler:           router.New(api, cfg, frontendDir),
+                ReadHeaderTimeout: 10 * time.Second,
+                ReadTimeout:       30 * time.Second,
+                WriteTimeout:      30 * time.Second,
+                IdleTimeout:       60 * time.Second,
+        }
+
+        log.Printf("KencatExpress API listening on http://localhost:%s", cfg.Port)
+        log.Printf("Serving frontend from %s", frontendDir)
+        if err := srv.ListenAndServe(); err != nil &amp;&amp; err != http.ErrServerClosed </span><span class="cov0" title="0">{
+                log.Fatalf("server stopped with error: %v", err)
+        }</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">// หมวย
+package config
+
+import (
+        "os"
+        "strconv"
+        "strings"
+        "time"
+)
+
+type Config struct {
+        AppEnv          string
+        Port            string
+        DBHost          string
+        DBPort          string
+        DBUser          string
+        DBPassword      string
+        DBName          string
+        JWTSecret       string
+        JWTTTL          time.Duration
+        PasswordSalt    string
+        AutoMigrate     bool
+        AutoSeed        bool
+        CORSAllowOrigin string
+        FrontendDir     string
+}
+
+func Load() Config <span class="cov0" title="0">{
+        return Config{
+                AppEnv:          env("APP_ENV", "development"),
+                Port:            env("PORT", "8080"),
+                DBHost:          env("DB_HOST", "127.0.0.1"),
+                DBPort:          env("DB_PORT", "3306"),
+                DBUser:          env("DB_USER", "root"),
+                DBPassword:      env("DB_PASSWORD", "Muaymin_ly12548"),
+                DBName:          env("DB_NAME", "kencat"),
+                JWTSecret:       env("JWT_SECRET", "kencat-super-secret-key"),
+                JWTTTL:          envDuration("JWT_TTL", 24*time.Hour),
+                PasswordSalt:    env("PASSWORD_SALT", "kencat-express-salt"),
+                AutoMigrate:     envBool("AUTO_MIGRATE", true),
+                AutoSeed:        envBool("AUTO_SEED", true),
+                CORSAllowOrigin: env("CORS_ALLOW_ORIGIN", "http://localhost:8080"),
+                FrontendDir:     env("FRONTEND_DIR", "../Frontend"),
+        }
+}</span>
+
+func env(key, fallback string) string <span class="cov0" title="0">{
+        if v := strings.TrimSpace(os.Getenv(key)); v != "" </span><span class="cov0" title="0">{
+                return v
+        }</span>
+        <span class="cov0" title="0">return fallback</span>
+}
+
+func envBool(key string, fallback bool) bool <span class="cov0" title="0">{
+        if v := strings.TrimSpace(os.Getenv(key)); v != "" </span><span class="cov0" title="0">{
+                parsed, err := strconv.ParseBool(v)
+                if err == nil </span><span class="cov0" title="0">{
+                        return parsed
+                }</span>
+        }
+        <span class="cov0" title="0">return fallback</span>
+}
+
+func envDuration(key string, fallback time.Duration) time.Duration <span class="cov0" title="0">{
+        if v := strings.TrimSpace(os.Getenv(key)); v != "" </span><span class="cov0" title="0">{
+                parsed, err := time.ParseDuration(v)
+                if err == nil </span><span class="cov0" title="0">{
+                        return parsed
+                }</span>
+        }
+        <span class="cov0" title="0">return fallback</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">// หมวย
+package controller
+
+import (
+        "net/http"
+        "strconv"
+        "strings"
+        "time"
+
+        "kencatexpress/backend/internal/dto"
+        "kencatexpress/backend/internal/middleware"
+        "kencatexpress/backend/internal/service"
+        "kencatexpress/backend/internal/util"
+)
+
+type API struct {
+        auth      *service.AuthService
+        users     *service.UserService
+        shipping  *service.ShippingService
+        parcels   *service.ParcelService
+        tracking  *service.TrackingService
+        messenger *service.MessengerService
+        vehicles  *service.VehicleService
+        reports   *service.ReportService
+        tokenTTL  time.Duration
+}
+
+func NewAPI(auth *service.AuthService, users *service.UserService, shipping *service.ShippingService, parcels *service.ParcelService, tracking *service.TrackingService, messenger *service.MessengerService, vehicles *service.VehicleService, reports *service.ReportService, tokenTTL time.Duration) *API <span class="cov0" title="0">{
+        return &amp;API{
+                auth:      auth,
+                users:     users,
+                shipping:  shipping,
+                parcels:   parcels,
+                tracking:  tracking,
+                messenger: messenger,
+                vehicles:  vehicles,
+                reports:   reports,
+                tokenTTL:  tokenTTL,
+        }
+}</span>
+
+// ด้า 1) POST /api/auth/login
+func (a *API) Login(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        var req dto.LoginRequest
+        if err := util.DecodeJSON(r, &amp;req); err != nil </span><span class="cov0" title="0">{
+                util.ErrorJSON(w, http.StatusBadRequest, err.Error())
+                return
+        }</span>
+
+        <span class="cov0" title="0">resp, err := a.auth.Login(r.Context(), req)
+        if err != nil </span><span class="cov0" title="0">{
+                util.ErrorJSON(w, http.StatusUnauthorized, err.Error())
+                return
+        }</span>
+
+        <span class="cov0" title="0">http.SetCookie(w, &amp;http.Cookie{
+                Name:     util.CookieName,
+                Value:    resp.Token,
+                Path:     "/",
+                HttpOnly: true,
+                SameSite: http.SameSiteLaxMode,
+                MaxAge:   int(a.tokenTTL.Seconds()),
+        })
+
+        util.WriteJSON(w, http.StatusOK, resp)</span>
+}
+
+// ด้า 2) GET /api/users/{userId}
+func (a *API) GetUserByID(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        userID, err := strconv.ParseInt(r.PathValue("userId"), 10, 64)
+        if err != nil || userID &lt;= 0 </span><span class="cov0" title="0">{
+                util.ErrorJSON(w, http.StatusBadRequest, "invalid user id")
+                return
+        }</span>
+
+        <span class="cov0" title="0">user, err := a.users.GetCustomerByID(r.Context(), userID)
+        if err != nil </span><span class="cov0" title="0">{
+                util.ErrorJSON(w, http.StatusNotFound, err.Error())
+                return
+        }</span>
+
+        <span class="cov0" title="0">util.WriteJSON(w, http.StatusOK, user)</span>
+}
+
+// วุ่น 3) POST /api/parcels
+func (a *API) CreateParcel(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        var req dto.ParcelRequest
+        if err := util.DecodeJSON(r, &amp;req); err != nil </span><span class="cov0" title="0">{
+                util.ErrorJSON(w, http.StatusBadRequest, err.Error())
+                return
+        }</span>
+
+        <span class="cov0" title="0">var clerkID *int64
+        if claims, ok := middleware.ClaimsFromContext(r.Context()); ok </span><span class="cov0" title="0">{
+                role := util.NormalizeRole(claims.Role)
+                if role == util.RoleParcelClerk || role == util.RoleAdmin </span><span class="cov0" title="0">{
+                        clerkID = &amp;claims.EmployeeID
+                }</span>
+        }
+
+        <span class="cov0" title="0">resp, err := a.parcels.CreateParcel(r.Context(), req, clerkID)
+        if err != nil </span><span class="cov0" title="0">{
+                util.ErrorJSON(w, http.StatusBadRequest, err.Error())
+                return
+        }</span>
+
+        <span class="cov0" title="0">util.WriteJSON(w, http.StatusCreated, resp)</span>
+}
+
+// วุ่น 4) GET /api/parcels
+func (a *API) ListParcels(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        items, err := a.parcels.ListParcels(r.Context())
+        if err != nil </span><span class="cov0" title="0">{
+                util.ErrorJSON(w, http.StatusInternalServerError, err.Error())
+                return
+        }</span>
+
+        <span class="cov0" title="0">util.WriteJSON(w, http.StatusOK, items)</span>
+}
+
+// กัส 5) GET /api/parcels/{parcelId}
+func (a *API) GetParcel(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        detail, err := a.parcels.GetParcelDetail(r.Context(), r.PathValue("parcelId"))
+        if err != nil </span><span class="cov0" title="0">{
+                util.ErrorJSON(w, http.StatusNotFound, err.Error())
+                return
+        }</span>
+
+        <span class="cov0" title="0">util.WriteJSON(w, http.StatusOK, detail)</span>
+}
+
+// กัส 6) GET /api/shipping/calculate
+func (a *API) CalculateShipping(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        q := r.URL.Query()
+        deliveryType := q.Get("deliveryType")
+        if deliveryType == "" </span><span class="cov0" title="0">{
+                deliveryType = q.Get("type")
+        }</span>
+
+        <span class="cov0" title="0">weight, err := strconv.ParseFloat(q.Get("weight"), 64)
+        if err != nil </span><span class="cov0" title="0">{
+                util.ErrorJSON(w, http.StatusBadRequest, "invalid weight")
+                return
+        }</span>
+
+        <span class="cov0" title="0">quote, err := a.shipping.Calculate(
+                r.Context(),
+                q.Get("origin"),
+                q.Get("destination"),
+                deliveryType,
+                weight,
+        )
+        if err != nil </span><span class="cov0" title="0">{
+                util.ErrorJSON(w, http.StatusBadRequest, err.Error())
+                return
+        }</span>
+
+        <span class="cov0" title="0">util.WriteJSON(w, http.StatusOK, quote)</span>
+}
+
+// หมวย 7) GET /api/trackings/{trackId}
+func (a *API) GetTracking(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        tracking, err := a.tracking.GetTracking(r.Context(), r.PathValue("trackId"))
+        if err != nil </span><span class="cov0" title="0">{
+                util.ErrorJSON(w, http.StatusNotFound, err.Error())
+                return
+        }</span>
+
+        <span class="cov0" title="0">util.WriteJSON(w, http.StatusOK, tracking)</span>
+}
+
+// หมวย 8) PUT /api/trackings/{trackId}/status
+func (a *API) UpdateTrackingStatus(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        var req dto.TrackingStatusUpdateRequest
+        if err := util.DecodeJSON(r, &amp;req); err != nil </span><span class="cov0" title="0">{
+                util.ErrorJSON(w, http.StatusBadRequest, err.Error())
+                return
+        }</span>
+
+        <span class="cov0" title="0">if strings.TrimSpace(req.Status) == "" </span><span class="cov0" title="0">{
+                util.ErrorJSON(w, http.StatusBadRequest, "status is required")
+                return
+        }</span>
+
+        <span class="cov0" title="0">employeeID := employeeIDFromClaims(r)
+        if err := a.tracking.UpdateStatus(
+                r.Context(),
+                r.PathValue("trackId"),
+                req.Status,
+                req.Description,
+                req.Location,
+                employeeID,
+        ); err != nil </span><span class="cov0" title="0">{
+                util.ErrorJSON(w, http.StatusBadRequest, err.Error())
+                return
+        }</span>
+
+        <span class="cov0" title="0">util.SuccessJSON(w, http.StatusOK, map[string]interface{}{
+                "message": "status updated",
+                "trackID": r.PathValue("trackId"),
+                "status":  util.NormalizeStatus(req.Status),
+        })</span>
+}
+
+// โอม 9) GET /api/messenger/tasks
+func (a *API) GetMessengerTasks(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        var employeeID int64
+        if claims, ok := middleware.ClaimsFromContext(r.Context()); ok </span><span class="cov0" title="0">{
+                employeeID = claims.EmployeeID
+        }</span>
+
+        <span class="cov0" title="0">items, err := a.messenger.ListTasks(r.Context(), employeeID)
+        if err != nil </span><span class="cov0" title="0">{
+                util.ErrorJSON(w, http.StatusInternalServerError, err.Error())
+                return
+        }</span>
+
+        <span class="cov0" title="0">util.WriteJSON(w, http.StatusOK, items)</span>
+}
+
+// โอม 10) POST /api/vehicle/assign
+func (a *API) AssignVehicle(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        var req dto.VehicleAssignRequest
+        if err := util.DecodeJSON(r, &amp;req); err != nil </span><span class="cov0" title="0">{
+                util.ErrorJSON(w, http.StatusBadRequest, err.Error())
+                return
+        }</span>
+
+        <span class="cov0" title="0">if req.MessengerID == 0 </span><span class="cov0" title="0">{
+                if claims, ok := middleware.ClaimsFromContext(r.Context()); ok </span><span class="cov0" title="0">{
+                        req.MessengerID = claims.EmployeeID
+                }</span>
+        }
+
+        <span class="cov0" title="0">if err := a.vehicles.AssignVehicle(r.Context(), req.TrackID, req.VehicleID, req.MessengerID); err != nil </span><span class="cov0" title="0">{
+                util.ErrorJSON(w, http.StatusBadRequest, err.Error())
+                return
+        }</span>
+
+        <span class="cov0" title="0">util.SuccessJSON(w, http.StatusOK, map[string]interface{}{
+                "message": "vehicle assigned",
+                "trackID": req.TrackID,
+        })</span>
+}
+
+// ยีน 11) POST /api/reports
+func (a *API) CreateReport(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        var req dto.ReportCreateRequest
+        if err := util.DecodeJSON(r, &amp;req); err != nil </span><span class="cov0" title="0">{
+                util.ErrorJSON(w, http.StatusBadRequest, err.Error())
+                return
+        }</span>
+
+        <span class="cov0" title="0">report, err := a.reports.CreateReport(r.Context(), req)
+        if err != nil </span><span class="cov0" title="0">{
+                util.ErrorJSON(w, http.StatusBadRequest, err.Error())
+                return
+        }</span>
+
+        <span class="cov0" title="0">util.SuccessJSON(w, http.StatusCreated, map[string]interface{}{
+                "message":    "report created",
+                "reportCode": report.ReportCode,
+                "trackID":    report.TrackingCode,
+        })</span>
+}
+
+// ยีน 12) GET /api/reports
+func (a *API) ListReports(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        reports, err := a.reports.ListReports(r.Context())
+        if err != nil </span><span class="cov0" title="0">{
+                util.ErrorJSON(w, http.StatusInternalServerError, err.Error())
+                return
+        }</span>
+
+        <span class="cov0" title="0">util.WriteJSON(w, http.StatusOK, reports)</span>
+}
+
+// ยีน 12) GET /api/reports
+func employeeIDFromClaims(r *http.Request) *int64 <span class="cov0" title="0">{
+        if claims, ok := middleware.ClaimsFromContext(r.Context()); ok </span><span class="cov0" title="0">{
+                id := claims.EmployeeID
+                return &amp;id
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">// ด้า
+package database
+
+import (
+        "context"
+        "database/sql"
+        "fmt"
+        "sort"
+        "strings"
+        "time"
+
+        _ "github.com/go-sql-driver/mysql"
+
+        "kencatexpress/backend/internal/config"
+        "kencatexpress/backend/migrations"
+)
+
+func Open(cfg config.Config) (*sql.DB, error) <span class="cov0" title="0">{
+        dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true&amp;charset=utf8mb4&amp;loc=Local&amp;multiStatements=true",
+                cfg.DBUser,
+                cfg.DBPassword,
+                cfg.DBHost,
+                cfg.DBPort,
+                cfg.DBName,
+        )
+        db, err := sql.Open("mysql", dsn)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov0" title="0">db.SetMaxOpenConns(20)
+        db.SetMaxIdleConns(10)
+        db.SetConnMaxLifetime(5 * time.Minute)
+        db.SetConnMaxIdleTime(2 * time.Minute)
+        if err := db.Ping(); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov0" title="0">return db, nil</span>
+}
+
+func Bootstrap(ctx context.Context, db *sql.DB, autoMigrate, autoSeed bool) error <span class="cov0" title="0">{
+        entries, err := migrations.Files.ReadDir(".")
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov0" title="0">var names []string
+        for _, entry := range entries </span><span class="cov0" title="0">{
+                if entry.IsDir() </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+                <span class="cov0" title="0">if strings.HasSuffix(entry.Name(), ".sql") </span><span class="cov0" title="0">{
+                        names = append(names, entry.Name())
+                }</span>
+        }
+        <span class="cov0" title="0">sort.Strings(names)
+        for _, name := range names </span><span class="cov0" title="0">{
+                if strings.Contains(name, "seed") &amp;&amp; !autoSeed </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+                <span class="cov0" title="0">if !strings.Contains(name, "seed") &amp;&amp; !autoMigrate </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+                <span class="cov0" title="0">content, err := migrations.Files.ReadFile(name)
+                if err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                <span class="cov0" title="0">if strings.TrimSpace(string(content)) == "" </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+                <span class="cov0" title="0">if _, err := db.ExecContext(ctx, string(content)); err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("executing migration %s: %w", name, err)
+                }</span>
+        }
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">// โอม
+package middleware
+
+import (
+        "context"
+        "log"
+        "net/http"
+        "strings"
+        "time"
+
+        "kencatexpress/backend/internal/config"
+        "kencatexpress/backend/internal/util"
+)
+
+type contextKey string
+
+const claimsKey contextKey = "auth_claims"
+
+type Middleware func(http.Handler) http.Handler
+
+func Chain(h http.Handler, middlewares ...Middleware) http.Handler <span class="cov0" title="0">{
+        for i := len(middlewares) - 1; i &gt;= 0; i-- </span><span class="cov0" title="0">{
+                h = middlewares[i](h)
+        }</span>
+        <span class="cov0" title="0">return h</span>
+}
+
+func Recoverer(next http.Handler) http.Handler <span class="cov0" title="0">{
+        return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov0" title="0">{
+                defer func() </span><span class="cov0" title="0">{
+                        if rec := recover(); rec != nil </span><span class="cov0" title="0">{
+                                util.ErrorJSON(w, http.StatusInternalServerError, "internal server error")
+                        }</span>
+                }()
+                <span class="cov0" title="0">next.ServeHTTP(w, r)</span>
+        })
+}
+
+func RequestLogger(next http.Handler) http.Handler <span class="cov0" title="0">{
+        return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov0" title="0">{
+                start := time.Now()
+                recorder := &amp;statusRecorder{ResponseWriter: w, status: http.StatusOK}
+                next.ServeHTTP(recorder, r)
+                log.Printf("%s %s %d %s", r.Method, r.URL.Path, recorder.status, time.Since(start))
+        }</span>)
+}
+
+func CORS(cfg config.Config) Middleware <span class="cov0" title="0">{
+        return func(next http.Handler) http.Handler </span><span class="cov0" title="0">{
+                return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov0" title="0">{
+                        allowedOrigin := strings.TrimSpace(cfg.CORSAllowOrigin)
+                        requestOrigin := strings.TrimSpace(r.Header.Get("Origin"))
+
+                        // อนุญาตเฉพาะ origin ที่กำหนดไว้เท่านั้น
+                        if requestOrigin != "" &amp;&amp; requestOrigin != allowedOrigin </span><span class="cov0" title="0">{
+                                util.ErrorJSON(w, http.StatusForbidden, "origin not allowed")
+                                return
+                        }</span>
+
+                        <span class="cov0" title="0">if allowedOrigin != "" </span><span class="cov0" title="0">{
+                                w.Header().Set("Access-Control-Allow-Origin", allowedOrigin)
+                                w.Header().Set("Vary", "Origin")
+                                w.Header().Set("Access-Control-Allow-Credentials", "true")
+                                w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+                                w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS")
+                        }</span>
+
+                        <span class="cov0" title="0">if r.Method == http.MethodOptions </span><span class="cov0" title="0">{
+                                w.WriteHeader(http.StatusNoContent)
+                                return
+                        }</span>
+
+                        <span class="cov0" title="0">next.ServeHTTP(w, r)</span>
+                })
+        }
+}
+
+func OptionalAuth(secret string) Middleware <span class="cov0" title="0">{
+        return func(next http.Handler) http.Handler </span><span class="cov0" title="0">{
+                return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov0" title="0">{
+                        claims, ok := readClaims(r, secret)
+                        if ok </span><span class="cov0" title="0">{
+                                r = r.WithContext(context.WithValue(r.Context(), claimsKey, claims))
+                        }</span>
+                        <span class="cov0" title="0">next.ServeHTTP(w, r)</span>
+                })
+        }
+}
+
+func RequireAuth(secret string) Middleware <span class="cov0" title="0">{
+        return func(next http.Handler) http.Handler </span><span class="cov0" title="0">{
+                return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov0" title="0">{
+                        claims, ok := readClaims(r, secret)
+                        if !ok </span><span class="cov0" title="0">{
+                                util.ErrorJSON(w, http.StatusUnauthorized, "authentication required")
+                                return
+                        }</span>
+                        <span class="cov0" title="0">r = r.WithContext(context.WithValue(r.Context(), claimsKey, claims))
+                        next.ServeHTTP(w, r)</span>
+                })
+        }
+}
+
+func RequireRoles(roles ...string) Middleware <span class="cov0" title="0">{
+        allowed := map[string]struct{}{}
+        for _, role := range roles </span><span class="cov0" title="0">{
+                allowed[util.NormalizeRole(role)] = struct{}{}
+        }</span>
+
+        <span class="cov0" title="0">return func(next http.Handler) http.Handler </span><span class="cov0" title="0">{
+                return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov0" title="0">{
+                        claims, ok := ClaimsFromContext(r.Context())
+                        if !ok </span><span class="cov0" title="0">{
+                                util.ErrorJSON(w, http.StatusUnauthorized, "authentication required")
+                                return
+                        }</span>
+                        <span class="cov0" title="0">if _, exists := allowed[util.NormalizeRole(claims.Role)]; !exists </span><span class="cov0" title="0">{
+                                util.ErrorJSON(w, http.StatusForbidden, "insufficient permissions")
+                                return
+                        }</span>
+                        <span class="cov0" title="0">next.ServeHTTP(w, r)</span>
+                })
+        }
+}
+
+func ClaimsFromContext(ctx context.Context) (*util.Claims, bool) <span class="cov0" title="0">{
+        claims, ok := ctx.Value(claimsKey).(*util.Claims)
+        return claims, ok
+}</span>
+
+func readClaims(r *http.Request, secret string) (*util.Claims, bool) <span class="cov0" title="0">{
+        token := util.ParseBearerToken(r.Header.Get("Authorization"))
+        if token == "" </span><span class="cov0" title="0">{
+                cookie, err := r.Cookie(util.CookieName)
+                if err == nil </span><span class="cov0" title="0">{
+                        token = strings.TrimSpace(cookie.Value)
+                }</span>
+        }
+        <span class="cov0" title="0">if token == "" </span><span class="cov0" title="0">{
+                return nil, false
+        }</span>
+
+        <span class="cov0" title="0">claims, err := util.ParseJWT(token, secret)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, false
+        }</span>
+        <span class="cov0" title="0">return claims, true</span>
+}
+
+type statusRecorder struct {
+        http.ResponseWriter
+        status int
+}
+
+func (r *statusRecorder) WriteHeader(status int) <span class="cov0" title="0">{
+        r.status = status
+        r.ResponseWriter.WriteHeader(status)
+}</span>
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">// กัส
+package router
+
+import (
+        "net/http"
+        "strings"
+
+        "kencatexpress/backend/internal/config"
+        "kencatexpress/backend/internal/controller"
+        "kencatexpress/backend/internal/middleware"
+        "kencatexpress/backend/internal/util"
+)
+
+func New(api *controller.API, cfg config.Config, frontendDir string) http.Handler <span class="cov0" title="0">{
+        mux := http.NewServeMux()
+
+        wrap := func(h http.Handler, auth ...middleware.Middleware) http.Handler </span><span class="cov0" title="0">{
+                mws := []middleware.Middleware{middleware.Recoverer, middleware.RequestLogger, middleware.CORS(cfg)}
+                mws = append(mws, auth...)
+                return middleware.Chain(h, mws...)
+        }</span>
+
+//ด้า
+        <span class="cov0" title="0">mux.Handle("POST /api/auth/login", wrap(http.HandlerFunc(api.Login)))
+        mux.Handle("GET /api/users/{userId}", wrap(http.HandlerFunc(api.GetUserByID), middleware.RequireAuth(cfg.JWTSecret)))
+
+//วุ่น
+        mux.Handle(
+                "POST /api/parcels",
+                wrap(
+                        http.HandlerFunc(api.CreateParcel),
+                        middleware.RequireAuth(cfg.JWTSecret),
+                        middleware.RequireRoles("PARCEL_CLERK", "ADMIN"),
+                ),
+        )
+        mux.Handle("GET /api/parcels", wrap(http.HandlerFunc(api.ListParcels), middleware.RequireAuth(cfg.JWTSecret)))
+        
+//กัส
+        mux.Handle("GET /api/parcels/{parcelId}", wrap(http.HandlerFunc(api.GetParcel), middleware.RequireAuth(cfg.JWTSecret)))
+        mux.Handle("GET /api/shipping/calculate", wrap(http.HandlerFunc(api.CalculateShipping)))
+//หมวย
+        mux.Handle("GET /api/trackings/{trackId}", wrap(http.HandlerFunc(api.GetTracking)))
+        mux.Handle("PUT /api/trackings/{trackId}/status", wrap(http.HandlerFunc(api.UpdateTrackingStatus), middleware.RequireAuth(cfg.JWTSecret)))
+//โอม
+        mux.Handle("GET /api/messenger/tasks", wrap(http.HandlerFunc(api.GetMessengerTasks), middleware.RequireAuth(cfg.JWTSecret)))
+        mux.Handle("POST /api/vehicle/assign", wrap(http.HandlerFunc(api.AssignVehicle), middleware.RequireAuth(cfg.JWTSecret)))
+//ยีน
+        mux.Handle("POST /api/reports", wrap(http.HandlerFunc(api.CreateReport)))
+        mux.Handle(
+                "GET /api/reports",
+                wrap(
+                        http.HandlerFunc(api.ListReports),
+                        middleware.RequireAuth(cfg.JWTSecret),
+                        middleware.RequireRoles("PARCEL_CLERK", "ADMIN"),
+                ),
+        )
+//กัส
+        mux.HandleFunc("GET /docs/openapi.yaml", func(w http.ResponseWriter, r *http.Request) </span><span class="cov0" title="0">{
+                http.ServeFile(w, r, "docs/openapi.yaml")
+        }</span>)
+//กัส
+        <span class="cov0" title="0">fileServer := http.FileServer(http.Dir(frontendDir))
+        mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) </span><span class="cov0" title="0">{
+                if r.URL.Path == "/api" || strings.HasPrefix(r.URL.Path, "/api/") </span><span class="cov0" title="0">{
+                        util.ErrorJSON(w, http.StatusNotFound, "endpoint not found")
+                        return
+                }</span>
+                <span class="cov0" title="0">fileServer.ServeHTTP(w, r)</span>
+        }))
+        <span class="cov0" title="0">return mux</span>
+}
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">// ด้า
+package service
+
+import (
+        "context"
+        "database/sql"
+        "errors"
+        "fmt"
+        "strings"
+        "time"
+
+        "kencatexpress/backend/internal/dto"
+        "kencatexpress/backend/internal/util"
+)
+
+// ด้า
+// หน้าที่: POST /api/auth/login
+// Service นี้รับผิดชอบตรวจสอบ employeeID/password/role และสร้าง JWT token
+// Test ที่เกี่ยวข้อง: auth_service_test.go
+type AuthService struct {
+        employees    EmployeeStore
+        jwtSecret    string
+        passwordSalt string
+        tokenTTL     time.Duration
+}
+
+// ด้า - สร้าง AuthService โดยรับ repository interface เพื่อให้ mock ใน test ได้
+func NewAuthService(employees EmployeeStore, jwtSecret, passwordSalt string, tokenTTL time.Duration) *AuthService <span class="cov8" title="1">{
+        return &amp;AuthService{employees: employees, jwtSecret: jwtSecret, passwordSalt: passwordSalt, tokenTTL: tokenTTL}
+}</span>
+
+// ด้า - Login ตรวจ credentials แล้วคืน token และข้อมูลผู้ใช้
+func (s *AuthService) Login(ctx context.Context, req dto.LoginRequest) (*dto.LoginResponse, error) <span class="cov8" title="1">{
+        identity := util.NormalizeWhitespace(req.EmployeeID)
+        if identity == "" || strings.TrimSpace(req.Password) == "" </span><span class="cov8" title="1">{
+                return nil, errors.New("employeeID and password are required")
+        }</span>
+        <span class="cov8" title="1">role := util.NormalizeRole(req.Role)
+        emp, err := s.employees.FindEmployeeByIdentity(ctx, identity)
+        if err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, sql.ErrNoRows) </span><span class="cov8" title="1">{
+                        return nil, errors.New("invalid credentials")
+                }</span>
+                <span class="cov8" title="1">return nil, err</span>
+        }
+        <span class="cov8" title="1">if !emp.IsActive </span><span class="cov8" title="1">{
+                return nil, errors.New("employee account is inactive")
+        }</span>
+        <span class="cov8" title="1">if role != "" &amp;&amp; role != util.NormalizeRole(emp.Role) </span><span class="cov8" title="1">{
+                return nil, errors.New("role does not match the account")
+        }</span>
+        <span class="cov8" title="1">if !util.CheckPassword(req.Password, emp.PasswordHash, s.passwordSalt) </span><span class="cov8" title="1">{
+                return nil, errors.New("invalid credentials")
+        }</span>
+        <span class="cov8" title="1">now := time.Now()
+        claims := util.Claims{Subject: fmt.Sprintf("%d", emp.ID), EmployeeID: emp.ID, EmployeeCode: emp.EmployeeCode, Email: emp.Email, Role: util.NormalizeRole(emp.Role), Name: strings.TrimSpace(emp.FirstName + " " + emp.LastName), IssuedAt: now.Unix(), ExpiresAt: now.Add(s.tokenTTL).Unix()}
+        token, err := util.BuildJWT(claims, s.jwtSecret)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return &amp;dto.LoginResponse{Success: true, Token: token, User: map[string]interface{}{"id": emp.ID, "employeeCode": emp.EmployeeCode, "email": emp.Email, "firstName": emp.FirstName, "lastName": emp.LastName, "role": util.NormalizeRole(emp.Role), "roleCode": util.RoleToLegacyCode(emp.Role), "displayRole": util.RoleDisplayName(emp.Role)}}, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">// โอม
+package service
+
+import (
+        "context"
+
+        "kencatexpress/backend/internal/domain"
+)
+
+// โอม
+// หน้าที่: GET /api/messenger/tasks
+// Service นี้รับผิดชอบดึงรายการงานของ messenger
+// Test ที่เกี่ยวข้อง: messenger_service_test.go
+type MessengerService struct{ parcels ParcelStore }
+
+// โอม - สร้าง MessengerService โดยรับ ParcelStore เพื่อ mock ใน test ได้
+func NewMessengerService(parcels ParcelStore) *MessengerService <span class="cov8" title="1">{
+        return &amp;MessengerService{parcels: parcels}
+}</span>
+
+// โอม - ดึงงานของ messenger ตาม employee id
+func (s *MessengerService) ListTasks(ctx context.Context, employeeID int64) ([]domain.ParcelListItem, error) <span class="cov8" title="1">{
+        return s.parcels.ListMessengerTasks(ctx, employeeID)
+}</span>
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package service
+
+import (
+        "context"
+        "database/sql"
+        "errors"
+        "fmt"
+        "strings"
+        "time"
+
+        "kencatexpress/backend/internal/domain"
+        "kencatexpress/backend/internal/dto"
+        "kencatexpress/backend/internal/util"
+)
+
+// วุ่น
+// หน้าที่: POST /api/parcels, GET /api/parcels
+// Service นี้รับผิดชอบสร้างพัสดุและดึงรายการพัสดุ
+// Test ที่เกี่ยวข้อง: parcel_service_test.go
+type ParcelService struct {
+        parcels  ParcelStore
+        shipping *ShippingService
+}
+
+// วุ่น - สร้าง ParcelService โดยรับ ParcelStore และ ShippingService เพื่อ mock ใน test ได้
+func NewParcelService(parcels ParcelStore, shipping *ShippingService) *ParcelService <span class="cov8" title="1">{
+        return &amp;ParcelService{parcels: parcels, shipping: shipping}
+}</span>
+
+// วุ่น - สร้างพัสดุใหม่ พร้อมสร้าง tracking code และ event เริ่มต้น
+func (s *ParcelService) CreateParcel(ctx context.Context, req dto.ParcelRequest, clerkID *int64) (*dto.ParcelCreateResponse, error) <span class="cov8" title="1">{
+        if err := validatePerson(req.Deliver, "sender"); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">if err := validatePerson(req.Receiver, "receiver"); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">if req.Parcel.Weight &lt;= 0 </span><span class="cov8" title="1">{
+                return nil, errors.New("parcel weight must be greater than 0")
+        }</span>
+        <span class="cov8" title="1">quote, err := s.shipping.Calculate(ctx, req.Deliver.Province, req.Receiver.Province, req.Parcel.Type, req.Parcel.Weight)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">input := domain.ParcelCreateInput{Sender: toPerson(req.Deliver), Receiver: toPerson(req.Receiver), ParcelCode: util.GenerateCode("PCL"), TrackingCode: util.GenerateCode("TRK"), ClerkEmployeeID: clerkID, DeliveryType: quote.DeliveryType, Weight: req.Parcel.Weight, ShippingCost: quote.ShippingCost, OriginZone: quote.OriginZone, DestinationZone: quote.DestinationZone, Status: util.StatusPending, Notes: util.NormalizeWhitespace(req.Parcel.Notes), DepositedAt: time.Now(), InitialEvent: domain.TrackingEvent{Status: util.StatusPending, Location: req.Deliver.Province, Description: util.DefaultTrackingDescription(util.StatusPending), CreatedAt: time.Now()}}
+        if clerkID != nil </span><span class="cov8" title="1">{
+                input.InitialEvent.UpdatedByEmployeeID = clerkID
+        }</span>
+        <span class="cov8" title="1">created, err := s.parcels.CreateParcelGraph(ctx, input)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return &amp;dto.ParcelCreateResponse{Success: true, Message: "parcel created successfully", ParcelID: created.ParcelCode, TrackID: created.TrackingCode, ShippingCost: created.ShippingCost}, nil</span>
+}
+
+// วุ่น - ดึงรายการพัสดุทั้งหมด
+func (s *ParcelService) ListParcels(ctx context.Context) ([]domain.ParcelListItem, error) <span class="cov8" title="1">{
+        return s.parcels.ListParcels(ctx)
+}</span>
+
+// กัส
+// หน้าที่: GET /api/parcels/{parcelId}
+// อยู่ใน ParcelService เพราะข้อมูลมาจาก ParcelStore เหมือนกัน
+func (s *ParcelService) GetParcelDetail(ctx context.Context, identifier string) (*domain.ParcelDetail, error) <span class="cov8" title="1">{
+        if strings.TrimSpace(identifier) == "" </span><span class="cov8" title="1">{
+                return nil, errors.New("parcel identifier is required")
+        }</span>
+        <span class="cov8" title="1">detail, err := s.parcels.GetParcelDetail(ctx, strings.TrimSpace(identifier))
+        if err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, sql.ErrNoRows) </span><span class="cov8" title="1">{
+                        return nil, errors.New("parcel not found")
+                }</span>
+                <span class="cov8" title="1">return nil, err</span>
+        }
+        <span class="cov8" title="1">return detail, nil</span>
+}
+
+// วุ่น - ตรวจข้อมูลผู้ส่ง/ผู้รับก่อนสร้างพัสดุ
+func validatePerson(person dto.PersonAddressRequest, label string) error <span class="cov8" title="1">{
+        fields := map[string]string{
+                "name":        person.Name,
+                "surname":     person.Surname,
+                "phone":       person.Phone,
+                "homeNumber":  person.HomeNumber,
+                "district":    person.District,
+                "subdistrict": person.Subdistrict,
+                "province":    person.Province,
+                "zipcode":     person.Zipcode,
+        }
+        for field, value := range fields </span><span class="cov8" title="1">{
+                if strings.TrimSpace(value) == "" </span><span class="cov8" title="1">{
+                        return fmt.Errorf("%s %s is required", label, field)
+                }</span>
+        }
+        <span class="cov8" title="1">if !util.IsValidPhone(person.Phone) </span><span class="cov8" title="1">{
+                return fmt.Errorf("%s phone must be 9-10 digits", label)
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+// วุ่น - แปลง request ผู้ส่ง/ผู้รับให้เป็น domain model สำหรับบันทึกลงฐานข้อมูล
+func toPerson(req dto.PersonAddressRequest) domain.PersonAddress <span class="cov8" title="1">{
+        return domain.PersonAddress{
+                FirstName:   util.NormalizeWhitespace(req.Name),
+                LastName:    util.NormalizeWhitespace(req.Surname),
+                Phone:       strings.TrimSpace(req.Phone),
+                Email:       strings.TrimSpace(req.Email),
+                HomeNumber:  util.NormalizeWhitespace(req.HomeNumber),
+                Soi:         util.NormalizeWhitespace(req.Soi),
+                Road:        util.NormalizeWhitespace(req.Road),
+                District:    util.NormalizeWhitespace(req.District),
+                Subdistrict: util.NormalizeWhitespace(req.Subdistrict),
+                Province:    util.NormalizeWhitespace(req.Province),
+                Zipcode:     strings.TrimSpace(req.Zipcode),
+        }
+}</span>
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">// ยีน
+package service
+
+import (
+        "context"
+        "database/sql"
+        "errors"
+        "strings"
+
+        "kencatexpress/backend/internal/domain"
+        "kencatexpress/backend/internal/dto"
+        "kencatexpress/backend/internal/util"
+)
+
+// ยีน
+// หน้าที่: POST /api/reports, GET /api/reports
+// Service นี้รับผิดชอบสร้างรายงานปัญหาและดึงรายการรายงาน
+// Test ที่เกี่ยวข้อง: report_service_test.go
+type ReportService struct {
+        reports ReportStore
+        parcels ParcelStore
+}
+
+// ยีน - สร้าง ReportService โดยรับ ReportStore/ParcelStore เพื่อ mock ใน test ได้
+func NewReportService(reports ReportStore, parcels ParcelStore) *ReportService <span class="cov8" title="1">{
+        return &amp;ReportService{reports: reports, parcels: parcels}
+}</span>
+
+// ยีน - สร้าง report โดยตรวจสอบ track id ก่อนว่ามีพัสดุจริง
+func (s *ReportService) CreateReport(ctx context.Context, req dto.ReportCreateRequest) (*domain.Report, error) <span class="cov8" title="1">{
+        if strings.TrimSpace(req.TrackID) == "" </span><span class="cov8" title="1">{
+                return nil, errors.New("trackID is required")
+        }</span>
+        <span class="cov8" title="1">if strings.TrimSpace(req.Issue) == "" </span><span class="cov8" title="1">{
+                return nil, errors.New("issue is required")
+        }</span>
+        <span class="cov8" title="1">if strings.TrimSpace(req.Reason) == "" </span><span class="cov8" title="1">{
+                return nil, errors.New("reason is required")
+        }</span>
+        <span class="cov8" title="1">parcel, err := s.parcels.FindParcelByTrackingCode(ctx, strings.TrimSpace(req.TrackID))
+        if err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, sql.ErrNoRows) </span><span class="cov8" title="1">{
+                        return nil, errors.New("tracking not found")
+                }</span>
+                <span class="cov8" title="1">return nil, err</span>
+        }
+        <span class="cov8" title="1">report := &amp;domain.Report{ReportCode: util.GenerateCode("RPT"), ParcelID: &amp;parcel.ID, TrackingCode: strings.TrimSpace(req.TrackID), ReporterFirstName: util.NormalizeWhitespace(req.FirstName), ReporterLastName: util.NormalizeWhitespace(req.LastName), ReporterPhone: strings.TrimSpace(req.Phone), ReporterEmail: strings.TrimSpace(req.Email), IssueType: util.NormalizeWhitespace(req.Issue), Subject: util.NormalizeWhitespace(req.Issue), Description: util.NormalizeWhitespace(req.Reason), Status: "OPEN"}
+        id, err := s.reports.CreateReport(ctx, report)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">report.ID = id
+        return report, nil</span>
+}
+
+// ยีน - ดึงรายการ report ทั้งหมด
+func (s *ReportService) ListReports(ctx context.Context) ([]domain.Report, error) <span class="cov8" title="1">{
+        return s.reports.ListReports(ctx)
+}</span>
+</pre>
+		
+		<pre class="file" id="file10" style="display: none">// กัส
+package service
+
+import (
+        "context"
+        "database/sql"
+        "errors"
+
+        "kencatexpress/backend/internal/dto"
+        "kencatexpress/backend/internal/util"
+)
+
+// กัส
+// หน้าที่: GET /api/shipping/calculate
+// Service นี้รับผิดชอบคำนวณค่าส่งจากโซน ประเภทการส่ง และน้ำหนัก
+// Test ที่เกี่ยวข้อง: shipping_service_test.go
+type ShippingService struct{ rates ShippingRateStore }
+
+// กัส - สร้าง ShippingService โดยรับ rate repository เพื่อ mock ใน test ได้
+func NewShippingService(rates ShippingRateStore) *ShippingService <span class="cov8" title="1">{
+        return &amp;ShippingService{rates: rates}
+}</span>
+
+// กัส - คำนวณค่าส่งจากจังหวัดต้นทาง/ปลายทาง
+func (s *ShippingService) Calculate(ctx context.Context, originProvince, destinationProvince, deliveryType string, weight float64) (*dto.ShippingCalculationResponse, error) <span class="cov8" title="1">{
+        if weight &lt;= 0 </span><span class="cov8" title="1">{
+                return nil, errors.New("weight must be greater than 0")
+        }</span>
+        <span class="cov8" title="1">dType := util.NormalizeDeliveryType(deliveryType)
+        if dType != util.DeliveryStandard &amp;&amp; dType != util.DeliveryExpress </span><span class="cov8" title="1">{
+                return nil, errors.New("delivery type must be STANDARD or EXPRESS")
+        }</span>
+        <span class="cov8" title="1">originZone := util.ZoneFromProvince(originProvince)
+        destinationZone := util.ZoneFromProvince(destinationProvince)
+        cost, err := s.CalculateByZone(ctx, destinationZone, dType, weight)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+        <span class="cov8" title="1">return &amp;dto.ShippingCalculationResponse{OriginZone: originZone, DestinationZone: destinationZone, DeliveryType: dType, Weight: weight, ShippingCost: cost}, nil</span>
+}
+
+// กัส - คำนวณค่าส่งจาก zone โดยตรง ใช้ร่วมกับ ParcelService ตอนสร้างพัสดุ
+func (s *ShippingService) CalculateByZone(ctx context.Context, destinationZone, deliveryType string, weight float64) (float64, error) <span class="cov8" title="1">{
+        rate, err := s.rates.FindMatchedRate(ctx, destinationZone, util.NormalizeDeliveryType(deliveryType), weight)
+        if err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, sql.ErrNoRows) </span><span class="cov8" title="1">{
+                        return 0, errors.New("shipping rate not found")
+                }</span>
+                <span class="cov8" title="1">return 0, err</span>
+        }
+        <span class="cov8" title="1">cost := rate.BasePrice
+        if weight &gt; rate.WeightMax </span><span class="cov8" title="1">{
+                cost += (weight - rate.WeightMax) * rate.ExtraPerKg
+        }</span>
+        <span class="cov8" title="1">return util.RoundCurrency(cost), nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file11" style="display: none">// หมวย
+package service
+
+import (
+        "context"
+        "database/sql"
+        "errors"
+        "fmt"
+        "strings"
+        "time"
+
+        "kencatexpress/backend/internal/domain"
+        "kencatexpress/backend/internal/util"
+)
+
+// หมวย
+// หน้าที่: GET /api/trackings/{trackId}, PUT /api/trackings/{trackId}/status
+// Service นี้รับผิดชอบดูสถานะพัสดุและอัปเดตสถานะตามลำดับที่อนุญาต
+// Test ที่เกี่ยวข้อง: tracking_service_test.go
+type TrackingService struct{ parcels ParcelStore }
+
+// หมวย - สร้าง TrackingService โดยรับ ParcelStore เพื่อ mock ใน test ได้
+func NewTrackingService(parcels ParcelStore) *TrackingService <span class="cov8" title="1">{
+        return &amp;TrackingService{parcels: parcels}
+}</span>
+
+// หมวย - ดึงข้อมูล tracking ตาม track id
+func (s *TrackingService) GetTracking(ctx context.Context, trackID string) (*domain.ParcelTrackingView, error) <span class="cov8" title="1">{
+        if strings.TrimSpace(trackID) == "" </span><span class="cov8" title="1">{
+                return nil, errors.New("track id is required")
+        }</span>
+        <span class="cov8" title="1">tracking, err := s.parcels.GetParcelTrackingView(ctx, strings.TrimSpace(trackID))
+        if err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, sql.ErrNoRows) </span><span class="cov8" title="1">{
+                        return nil, errors.New("tracking not found")
+                }</span>
+                <span class="cov8" title="1">return nil, err</span>
+        }
+        <span class="cov8" title="1">return tracking, nil</span>
+}
+
+// หมวย - อัปเดตสถานะ tracking พร้อมตรวจ transition ก่อนบันทึก
+func (s *TrackingService) UpdateStatus(ctx context.Context, trackID, rawStatus, description, location string, employeeID *int64) error <span class="cov8" title="1">{
+        if strings.TrimSpace(trackID) == "" </span><span class="cov8" title="1">{
+                return errors.New("track id is required")
+        }</span>
+        <span class="cov8" title="1">newStatus := util.NormalizeStatus(rawStatus)
+        if newStatus == "" </span><span class="cov8" title="1">{
+                return errors.New("status is required")
+        }</span>
+        <span class="cov8" title="1">parcel, err := s.parcels.FindParcelByTrackingCode(ctx, strings.TrimSpace(trackID))
+        if err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, sql.ErrNoRows) </span><span class="cov8" title="1">{
+                        return errors.New("tracking not found")
+                }</span>
+                <span class="cov0" title="0">return err</span>
+        }
+        <span class="cov8" title="1">currentStatus := util.NormalizeStatus(parcel.Status)
+        if currentStatus == newStatus </span><span class="cov8" title="1">{
+                return nil
+        }</span>
+        <span class="cov8" title="1">if !isAllowedTransition(currentStatus, newStatus) </span><span class="cov8" title="1">{
+                return fmt.Errorf("invalid status transition from %s to %s", currentStatus, newStatus)
+        }</span>
+        <span class="cov8" title="1">if strings.TrimSpace(description) == "" </span><span class="cov8" title="1">{
+                description = util.DefaultTrackingDescription(newStatus)
+        }</span>
+        <span class="cov8" title="1">if strings.TrimSpace(location) == "" </span><span class="cov8" title="1">{
+                location = defaultLocation(newStatus)
+        }</span>
+        <span class="cov8" title="1">var deliveredAt *time.Time
+        if newStatus == util.StatusDelivered </span><span class="cov8" title="1">{
+                now := time.Now()
+                deliveredAt = &amp;now
+        }</span>
+        <span class="cov8" title="1">return s.parcels.UpdateParcelStatus(ctx, domain.TrackingUpdateInput{TrackID: strings.TrimSpace(trackID), Status: newStatus, Location: location, Description: description, UpdatedByEmployeeID: employeeID, DeliveredAt: deliveredAt})</span>
+}
+
+// หมวย - ตรวจลำดับการเปลี่ยนสถานะ tracking ที่ระบบอนุญาต
+func isAllowedTransition(currentStatus, newStatus string) bool <span class="cov8" title="1">{
+        switch currentStatus </span>{
+        case util.StatusPending:<span class="cov8" title="1">
+                return newStatus == util.StatusInTransit || newStatus == util.StatusDeliveryFailed</span>
+        case util.StatusInTransit:<span class="cov8" title="1">
+                return newStatus == util.StatusDelivered || newStatus == util.StatusDeliveryFailed</span>
+        case util.StatusDelivered, util.StatusDeliveryFailed:<span class="cov8" title="1">
+                return false</span>
+        default:<span class="cov0" title="0">
+                return newStatus == util.StatusPending || newStatus == util.StatusInTransit || newStatus == util.StatusDelivered || newStatus == util.StatusDeliveryFailed</span>
+        }
+}
+
+// หมวย - กำหนด location เริ่มต้นเมื่อผู้ใช้ไม่ได้ส่ง location มากับการอัปเดตสถานะ
+func defaultLocation(status string) string <span class="cov8" title="1">{
+        switch util.NormalizeStatus(status) </span>{
+        case util.StatusPending:<span class="cov0" title="0">
+                return "Parcel Counter"</span>
+        case util.StatusInTransit:<span class="cov8" title="1">
+                return "On Route"</span>
+        case util.StatusDelivered, util.StatusDeliveryFailed:<span class="cov8" title="1">
+                return "Destination"</span>
+        default:<span class="cov0" title="0">
+                return "Kencat Express"</span>
+        }
+}
+</pre>
+		
+		<pre class="file" id="file12" style="display: none">// ด้า
+package service
+
+import (
+        "context"
+        "database/sql"
+        "errors"
+        "time"
+
+        "kencatexpress/backend/internal/domain"
+        "kencatexpress/backend/internal/dto"
+        "kencatexpress/backend/internal/util"
+)
+
+// ด้า
+// หน้าที่: GET /api/users/{userId}
+// Service นี้รับผิดชอบดึงข้อมูลลูกค้า และมีฟังก์ชันดึง profile พนักงานสำหรับหน้า profile
+// Test ที่เกี่ยวข้อง: user_service_test.go
+type UserService struct {
+        employees EmployeeStore
+        users     UserStore
+}
+
+// ด้า - สร้าง UserService โดยรับ repository interface เพื่อให้ mock ใน test ได้
+func NewUserService(employees EmployeeStore, users UserStore) *UserService <span class="cov8" title="1">{
+        return &amp;UserService{employees: employees, users: users}
+}</span>
+
+// ด้า - ดึงข้อมูลลูกค้าตาม id
+func (s *UserService) GetCustomerByID(ctx context.Context, id int64) (*domain.User, error) <span class="cov8" title="1">{
+        if id &lt;= 0 </span><span class="cov8" title="1">{
+                return nil, errors.New("invalid user id")
+        }</span>
+        <span class="cov8" title="1">user, err := s.users.FindCustomerByID(ctx, id)
+        if err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, sql.ErrNoRows) </span><span class="cov8" title="1">{
+                        return nil, errors.New("user not found")
+                }</span>
+                <span class="cov8" title="1">return nil, err</span>
+        }
+        <span class="cov8" title="1">return user, nil</span>
+}
+
+// ด้า - ดึง profile พนักงานที่ login อยู่
+func (s *UserService) GetEmployeeProfile(ctx context.Context, employeeID int64) (*dto.EmployeeProfileResponse, error) <span class="cov8" title="1">{
+        if employeeID &lt;= 0 </span><span class="cov8" title="1">{
+                return nil, errors.New("invalid employee id")
+        }</span>
+        <span class="cov8" title="1">emp, err := s.employees.FindEmployeeByID(ctx, employeeID)
+        if err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, sql.ErrNoRows) </span><span class="cov8" title="1">{
+                        return nil, errors.New("employee not found")
+                }</span>
+                <span class="cov8" title="1">return nil, err</span>
+        }
+        <span class="cov8" title="1">birthDate := ""
+        if emp.BirthDate != nil </span><span class="cov8" title="1">{
+                birthDate = emp.BirthDate.Format(time.RFC3339)
+        }</span>
+        <span class="cov8" title="1">return &amp;dto.EmployeeProfileResponse{EmployeeID: emp.EmployeeCode, Role: util.RoleToLegacyCode(emp.Role), Firstname: emp.FirstName, Lastname: emp.LastName, Email: emp.Email, Birthdate: birthDate, EmployeeCode: emp.EmployeeCode, DisplayRole: util.RoleDisplayName(emp.Role), FirstName: emp.FirstName, LastName: emp.LastName, RoleName: util.NormalizeRole(emp.Role)}, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file13" style="display: none">// โอม
+package service
+
+import (
+        "context"
+        "database/sql"
+        "errors"
+        "strings"
+
+        "kencatexpress/backend/internal/domain"
+)
+
+// โอม
+// หน้าที่: POST /api/vehicle/assign
+// Service นี้รับผิดชอบตรวจสอบรถและ assign รถให้ messenger กับพัสดุ
+// Test ที่เกี่ยวข้อง: vehicle_service_test.go
+type VehicleService struct {
+        parcels  ParcelStore
+        vehicles VehicleStore
+}
+
+// โอม - สร้าง VehicleService โดยรับ ParcelStore/VehicleStore เพื่อ mock ใน test ได้
+func NewVehicleService(parcels ParcelStore, vehicles VehicleStore) *VehicleService <span class="cov8" title="1">{
+        return &amp;VehicleService{parcels: parcels, vehicles: vehicles}
+}</span>
+
+// โอม - assign รถให้ messenger และผูกกับ tracking
+func (s *VehicleService) AssignVehicle(ctx context.Context, trackID string, vehicleID, messengerID int64) error <span class="cov8" title="1">{
+        if strings.TrimSpace(trackID) == "" </span><span class="cov8" title="1">{
+                return errors.New("track id is required")
+        }</span>
+        <span class="cov8" title="1">if vehicleID &lt;= 0 </span><span class="cov8" title="1">{
+                return errors.New("vehicle id is required")
+        }</span>
+        <span class="cov8" title="1">if messengerID &lt;= 0 </span><span class="cov8" title="1">{
+                return errors.New("messenger id is required")
+        }</span>
+        <span class="cov8" title="1">vehicle, err := s.vehicles.FindVehicleByID(ctx, vehicleID)
+        if err != nil </span><span class="cov8" title="1">{
+                if errors.Is(err, sql.ErrNoRows) </span><span class="cov8" title="1">{
+                        return errors.New("vehicle not found")
+                }</span>
+                <span class="cov8" title="1">return err</span>
+        }
+        <span class="cov8" title="1">if strings.ToUpper(strings.TrimSpace(vehicle.Status)) != "AVAILABLE" </span><span class="cov8" title="1">{
+                if vehicle.AssignedEmployeeID == nil || *vehicle.AssignedEmployeeID != messengerID </span><span class="cov8" title="1">{
+                        return errors.New("vehicle is not available")
+                }</span>
+        }
+        <span class="cov8" title="1">if err := s.vehicles.AssignVehicleToEmployee(ctx, vehicleID, messengerID); err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+        <span class="cov8" title="1">return s.parcels.AssignVehicle(ctx, domain.VehicleAssignmentInput{TrackID: strings.TrimSpace(trackID), VehicleID: vehicleID, MessengerEmployeeID: messengerID})</span>
+}
+</pre>
+		
+		<pre class="file" id="file14" style="display: none">// โอม
+package util
+
+import (
+        "crypto/hmac"
+        "crypto/rand"
+        "crypto/sha256"
+        "encoding/base64"
+        "encoding/hex"
+        "encoding/json"
+        "errors"
+        "fmt"
+        "io"
+        "math"
+        "net/http"
+        "regexp"
+        "strings"
+        "time"
+)
+
+const (
+        RoleAdmin       = "ADMIN"
+        RoleParcelClerk = "PARCEL_CLERK"
+        RoleMessenger   = "MESSENGER"
+
+        StatusPending        = "Pending"
+        StatusInTransit      = "In Transit"
+        StatusDelivered      = "Delivered"
+        StatusDeliveryFailed = "Delivery Failed"
+
+        DeliveryStandard = "STANDARD"
+        DeliveryExpress  = "EXPRESS"
+
+        ZoneBangkokMetro = "BANGKOK_METRO"
+        ZoneUpcountry    = "UPCOUNTRY"
+
+        CookieName = "kencat_token"
+)
+
+var phoneRegex = regexp.MustCompile(`^\d{9,10}$`)
+
+type Claims struct {
+        Subject      string `json:"sub"`
+        EmployeeID   int64  `json:"employee_id"`
+        EmployeeCode string `json:"employee_code"`
+        Email        string `json:"email"`
+        Role         string `json:"role"`
+        Name         string `json:"name"`
+        IssuedAt     int64  `json:"iat"`
+        ExpiresAt    int64  `json:"exp"`
+}
+
+func DecodeJSON(r *http.Request, dst interface{}) error <span class="cov0" title="0">{
+        defer r.Body.Close()
+        body, err := io.ReadAll(io.LimitReader(r.Body, 2&lt;&lt;20))
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov0" title="0">if len(strings.TrimSpace(string(body))) == 0 </span><span class="cov0" title="0">{
+                return errors.New("request body is required")
+        }</span>
+        <span class="cov0" title="0">return json.Unmarshal(body, dst)</span>
+}
+
+func WriteJSON(w http.ResponseWriter, status int, payload interface{}) <span class="cov0" title="0">{
+        w.Header().Set("Content-Type", "application/json; charset=utf-8")
+        w.WriteHeader(status)
+        _ = json.NewEncoder(w).Encode(payload)
+}</span>
+
+func ErrorJSON(w http.ResponseWriter, status int, message string) <span class="cov0" title="0">{
+        WriteJSON(w, status, map[string]interface{}{
+                "success": false,
+                "message": message,
+                "error":   message,
+        })
+}</span>
+
+func SuccessJSON(w http.ResponseWriter, status int, data map[string]interface{}) <span class="cov0" title="0">{
+        if data == nil </span><span class="cov0" title="0">{
+                data = map[string]interface{}{}
+        }</span>
+        <span class="cov0" title="0">data["success"] = true
+        WriteJSON(w, status, data)</span>
+}
+
+func NormalizeWhitespace(s string) string <span class="cov0" title="0">{
+        return strings.Join(strings.Fields(strings.TrimSpace(s)), " ")
+}</span>
+
+func NormalizeRole(s string) string <span class="cov0" title="0">{
+        s = strings.TrimSpace(strings.ToUpper(s))
+        s = strings.ReplaceAll(s, "-", " ")
+        s = strings.ReplaceAll(s, "_", " ")
+        s = strings.Join(strings.Fields(s), " ")
+        switch s </span>{
+        case "P", "PARCEL CLERK", "CLERK":<span class="cov0" title="0">
+                return RoleParcelClerk</span>
+        case "M", "MESSENGER", "DELIVERY":<span class="cov0" title="0">
+                return RoleMessenger</span>
+        case "A", "ADMIN", "ADMINISTRATOR":<span class="cov0" title="0">
+                return RoleAdmin</span>
+        default:<span class="cov0" title="0">
+                return s</span>
+        }
+}
+
+func RoleToLegacyCode(role string) string <span class="cov0" title="0">{
+        switch NormalizeRole(role) </span>{
+        case RoleParcelClerk:<span class="cov0" title="0">
+                return "P"</span>
+        case RoleMessenger:<span class="cov0" title="0">
+                return "M"</span>
+        case RoleAdmin:<span class="cov0" title="0">
+                return "A"</span>
+        default:<span class="cov0" title="0">
+                return ""</span>
+        }
+}
+
+func RoleDisplayName(role string) string <span class="cov0" title="0">{
+        switch NormalizeRole(role) </span>{
+        case RoleParcelClerk:<span class="cov0" title="0">
+                return "Parcel Clerk"</span>
+        case RoleMessenger:<span class="cov0" title="0">
+                return "Messenger"</span>
+        case RoleAdmin:<span class="cov0" title="0">
+                return "Admin"</span>
+        default:<span class="cov0" title="0">
+                return role</span>
+        }
+}
+
+func NormalizeDeliveryType(s string) string <span class="cov0" title="0">{
+        s = strings.ToUpper(strings.TrimSpace(s))
+        s = strings.ReplaceAll(s, "-", "_")
+        s = strings.ReplaceAll(s, " ", "_")
+        switch s </span>{
+        case "STANDARD", "NORMAL":<span class="cov0" title="0">
+                return DeliveryStandard</span>
+        case "EXPRESS", "FAST", "URGENT":<span class="cov0" title="0">
+                return DeliveryExpress</span>
+        default:<span class="cov0" title="0">
+                return s</span>
+        }
+}
+
+func NormalizeStatus(s string) string <span class="cov0" title="0">{
+        s = strings.TrimSpace(strings.ToLower(s))
+        s = strings.ReplaceAll(s, "_", " ")
+        s = strings.Join(strings.Fields(s), " ")
+        switch s </span>{
+        case "pending", "wait", "waiting":<span class="cov0" title="0">
+                return StatusPending</span>
+        case "in transit", "transit", "start", "start delivery", "on delivery", "doing delivery", "doing":<span class="cov0" title="0">
+                return StatusInTransit</span>
+        case "delivered", "complete", "success", "done":<span class="cov0" title="0">
+                return StatusDelivered</span>
+        case "delivery failed", "failed", "incomplete", "unsuccessful":<span class="cov0" title="0">
+                return StatusDeliveryFailed</span>
+        default:<span class="cov0" title="0">
+                return strings.TrimSpace(s)</span>
+        }
+}
+
+func LegacyStatus(status string) string <span class="cov0" title="0">{
+        switch NormalizeStatus(status) </span>{
+        case StatusDelivered:<span class="cov0" title="0">
+                return "Complete"</span>
+        case StatusDeliveryFailed:<span class="cov0" title="0">
+                return "Incomplete"</span>
+        default:<span class="cov0" title="0">
+                return status</span>
+        }
+}
+
+func DefaultTrackingDescription(status string) string <span class="cov0" title="0">{
+        switch NormalizeStatus(status) </span>{
+        case StatusPending:<span class="cov0" title="0">
+                return "Parcel registered at parcel counter"</span>
+        case StatusInTransit:<span class="cov0" title="0">
+                return "Messenger picked up parcel for delivery"</span>
+        case StatusDelivered:<span class="cov0" title="0">
+                return "Parcel delivered to receiver successfully"</span>
+        case StatusDeliveryFailed:<span class="cov0" title="0">
+                return "Delivery attempt was unsuccessful"</span>
+        default:<span class="cov0" title="0">
+                return "Tracking status updated"</span>
+        }
+}
+
+func IsValidPhone(phone string) bool <span class="cov0" title="0">{
+        return phoneRegex.MatchString(strings.TrimSpace(phone))
+}</span>
+
+func ZoneFromProvince(province string) string <span class="cov0" title="0">{
+        p := strings.TrimSpace(strings.ToLower(province))
+        switch p </span>{
+        case "bangkok", "กรุงเทพมหานคร", "nonthaburi", "นนทบุรี", "pathum thani", "ปทุมธานี", "samut prakan", "สมุทรปราการ", "bangkok metropolitan":<span class="cov0" title="0">
+                return ZoneBangkokMetro</span>
+        default:<span class="cov0" title="0">
+                return ZoneUpcountry</span>
+        }
+}
+
+func GenerateCode(prefix string) string <span class="cov0" title="0">{
+        var b [4]byte
+        _, _ = rand.Read(b[:])
+        stamp := time.Now().UnixNano() % 1000000
+        return fmt.Sprintf("%s-%06d%s", strings.ToUpper(prefix), stamp, strings.ToUpper(hex.EncodeToString(b[:]))[:4])
+}</span>
+
+func RoundCurrency(v float64) float64 <span class="cov0" title="0">{
+        return math.Round(v*100) / 100
+}</span>
+
+func HashPassword(raw, salt string) string <span class="cov0" title="0">{
+        h := sha256.Sum256([]byte(salt + raw))
+        return hex.EncodeToString(h[:])
+}</span>
+
+func CheckPassword(raw, hash, salt string) bool <span class="cov0" title="0">{
+        return strings.EqualFold(HashPassword(raw, salt), strings.TrimSpace(hash))
+}</span>
+
+func ParseBearerToken(authHeader string) string <span class="cov0" title="0">{
+        if authHeader == "" </span><span class="cov0" title="0">{
+                return ""
+        }</span>
+        <span class="cov0" title="0">parts := strings.SplitN(strings.TrimSpace(authHeader), " ", 2)
+        if len(parts) != 2 || !strings.EqualFold(parts[0], "Bearer") </span><span class="cov0" title="0">{
+                return ""
+        }</span>
+        <span class="cov0" title="0">return strings.TrimSpace(parts[1])</span>
+}
+
+func BuildJWT(claims Claims, secret string) (string, error) <span class="cov0" title="0">{
+        header := map[string]string{"alg": "HS256", "typ": "JWT"}
+        headerJSON, err := json.Marshal(header)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", err
+        }</span>
+        <span class="cov0" title="0">payloadJSON, err := json.Marshal(claims)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", err
+        }</span>
+        <span class="cov0" title="0">enc := base64.RawURLEncoding
+        headerPart := enc.EncodeToString(headerJSON)
+        payloadPart := enc.EncodeToString(payloadJSON)
+        signingInput := headerPart + "." + payloadPart
+        sig := signHMAC(signingInput, secret)
+        return signingInput + "." + sig, nil</span>
+}
+
+func ParseJWT(token, secret string) (*Claims, error) <span class="cov0" title="0">{
+        parts := strings.Split(token, ".")
+        if len(parts) != 3 </span><span class="cov0" title="0">{
+                return nil, errors.New("invalid token format")
+        }</span>
+        <span class="cov0" title="0">signingInput := parts[0] + "." + parts[1]
+        expected := signHMAC(signingInput, secret)
+        if !hmac.Equal([]byte(expected), []byte(parts[2])) </span><span class="cov0" title="0">{
+                return nil, errors.New("invalid token signature")
+        }</span>
+        <span class="cov0" title="0">payload, err := base64.RawURLEncoding.DecodeString(parts[1])
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, errors.New("invalid token payload")
+        }</span>
+        <span class="cov0" title="0">var claims Claims
+        if err := json.Unmarshal(payload, &amp;claims); err != nil </span><span class="cov0" title="0">{
+                return nil, errors.New("invalid token claims")
+        }</span>
+        <span class="cov0" title="0">if claims.ExpiresAt &gt; 0 &amp;&amp; time.Now().Unix() &gt;= claims.ExpiresAt </span><span class="cov0" title="0">{
+                return nil, errors.New("token expired")
+        }</span>
+        <span class="cov0" title="0">return &amp;claims, nil</span>
+}
+
+func signHMAC(data, secret string) string <span class="cov0" title="0">{
+        mac := hmac.New(sha256.New, []byte(secret))
+        mac.Write([]byte(data))
+        return base64.RawURLEncoding.EncodeToString(mac.Sum(nil))
+}</span>
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
