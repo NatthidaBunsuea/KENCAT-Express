@@ -504,7 +504,9 @@ curl.exe http://localhost:8080/api/reports
 - Test
 
 ```bash
-go test ./internal/service -cover
+go test ./... -coverprofile=coverage.out
+go tool cover -func=coverage.out
+go tool cover -html=coverage.out -o coverage.html
 
 ```
 
