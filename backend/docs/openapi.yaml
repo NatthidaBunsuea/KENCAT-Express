@@ -1,0 +1,41 @@
+openapi: 3.0.3
+info:
+  title: KencatExpress API
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+paths:
+  /api/auth/login:
+    post:
+      summary: Login employee
+  /api/users/{userId}:
+    get:
+      summary: Get customer by ID
+  /api/parcels:
+    post:
+      summary: Create parcel
+    get:
+      summary: List parcels
+  /api/parcels/{parcelId}:
+    get:
+      summary: Get parcel detail
+  /api/shipping/calculate:
+    get:
+      summary: Calculate shipping
+  /api/trackings/{trackId}:
+    get:
+      summary: Get tracking by track ID
+  /api/trackings/{trackId}/status:
+    put:
+      summary: Update tracking status
+  /api/messenger/tasks:
+    get:
+      summary: List messenger tasks
+  /api/vehicle/assign:
+    post:
+      summary: Assign vehicle to parcel
+  /api/reports:
+    post:
+      summary: Create report
+    get:
+      summary: List reports

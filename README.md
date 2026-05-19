@@ -29,6 +29,7 @@ KencatExpress เป็นระบบจัดการพัสดุ พั�
 
 - Go 1.21 หรือใหม่กว่า
 - MySQL 8.0 หรือใหม่กว่า
+- Docker Desktop
 - PowerShell / Terminal
 - Postman (ถ้าต้องการใช้ทดสอบแบบ GUI)
 
@@ -90,6 +91,7 @@ PASSWORD_SALT=kencat-express-salt
 ```bash
 cd KencatExpress
 cd backend
+go mod init kencatexpress/backend
 go mod tidy
 go run ./cmd/api/main.go
 ```
@@ -99,6 +101,54 @@ go run ./cmd/api/main.go
 ```text
 http://localhost:8080
 ```
+
+### 3.6 Build and Run with Docker (Optional)
+
+โปรเจกต์นี้รองรับการ build และ run ด้วย Docker โดยใช้ `docker-compose.yml` ที่ root project และ `backend/Dockerfile` สำหรับ build Backend API
+
+ก่อนรันด้วย Docker ต้องเปิด Docker Desktop ให้เรียบร้อยก่อน จากนั้นตรวจสอบว่า Docker ใช้งานได้ด้วยคำสั่ง
+
+```bash
+docker ps
+```
+
+ถ้า Docker พร้อมใช้งานแล้ว ให้กลับมาที่ root project
+
+```bash
+cd KencatExpress
+```
+
+แล้วรันคำสั่ง
+
+```bash
+docker compose up --build
+```
+
+คำสั่งนี้จะ build และ start services ที่จำเป็น เช่น
+
+- Backend API
+- MySQL Database
+- Frontend ที่เชื่อมกับ Backend
+
+เมื่อรันสำเร็จ สามารถเปิดระบบได้ที่
+
+```text
+http://localhost:8080
+```
+
+ถ้าต้องการหยุดระบบ ให้กด `Ctrl + C` หรือใช้คำสั่ง
+
+```bash
+docker compose down
+```
+
+ถ้าต้องการล้าง container และ volume เดิมของ database ให้ใช้
+
+```bash
+docker compose down -v
+```
+
+หมายเหตุ: ถ้ารันแล้วขึ้น warning ประมาณ `version is obsolete` ใน `docker-compose.yml` สามารถละไว้ได้ เพราะเป็น warning ไม่ใช่ error
 
 ## 4. Authentication Flow
 
@@ -503,8 +553,28 @@ curl.exe http://localhost:8080/api/reports
 - Test
 
 ```bash
-go test ./internal/service -cover
+go test ./... -coverprofile=coverage.out
+go tool cover -func=coverage.out
+go tool cover -html=coverage.out -o coverage.html
 
+```
+
+- Docker Build / Run
+
+```bash
+docker compose up --build
+```
+
+- Stop Docker containers
+
+```bash
+docker compose down
+```
+
+- Reset Docker database volume
+
+```bash
+docker compose down -v
 ```
 
 - login หน้าเว็บ
@@ -517,10 +587,4 @@ EmployeeID: clerk@kencat.local
 Password: 1234
 Role: Parcel Clerk
 
-EmployeeID: admin@kencat.local
-Password: 1234
-
-- Route `/api/users/profile` มีอยู่ในโปรเจกต์ แต่ไม่รวมใน 12 เส้นที่ต้องยื่น
-- Route `/api/vehicles/select` มีอยู่ในโปรเจกต์ แต่ไม่รวมใน 12 เส้นที่ต้องยื่น
-- ถ้าทดสอบใน PowerShell แนะนำใช้ `curl.exe` หรือ `Invoke-RestMethod`
 - Route ที่มีการป้องกันสิทธิ์ต้องส่ง `Authorization: Bearer <token>`
